@@ -1,0 +1,83 @@
+# mkdir Icon.iconset
+# sips -z 16 16     Icon.png --out Icon.iconset/icon_16x16.png
+# sips -z 32 32     Icon.png --out Icon.iconset/icon_16x16@2x.png
+# sips -z 32 32     Icon.png --out Icon.iconset/icon_32x32.png
+# sips -z 64 64     Icon.png --out Icon.iconset/icon_32x32@2x.png
+# sips -z 128 128   Icon.png --out Icon.iconset/icon_128x128.png
+# sips -z 256 256   Icon.png --out Icon.iconset/icon_128x128@2x.png
+# sips -z 256 256   Icon.png --out Icon.iconset/icon_256x256.png
+# sips -z 512 512   Icon.png --out Icon.iconset/icon_256x256@2x.png
+# sips -z 512 512   Icon.png --out Icon.iconset/icon_512x512.png
+# sips -z 1024 1024   Icon.png --out Icon.iconset/icon_512x512@2x.png
+# iconutil -c icns Icon.iconset
+# rm -R Icon.iconset
+
+# mkdir Icon1.iconset
+# sips -z 16 16     Icon1.png --out Icon1.iconset/icon_16x16.png
+# sips -z 32 32     Icon1.png --out Icon1.iconset/icon_16x16@2x.png
+# sips -z 32 32     Icon1.png --out Icon1.iconset/icon_32x32.png
+# sips -z 64 64     Icon1.png --out Icon1.iconset/icon_32x32@2x.png
+# sips -z 128 128   Icon1.png --out Icon1.iconset/icon_128x128.png
+# sips -z 256 256   Icon1.png --out Icon1.iconset/icon_128x128@2x.png
+# sips -z 256 256   Icon1.png --out Icon1.iconset/icon_256x256.png
+# sips -z 512 512   Icon1.png --out Icon1.iconset/icon_256x256@2x.png
+# sips -z 512 512   Icon1.png --out Icon1.iconset/icon_512x512.png
+# sips -z 1024 1024   Icon1.png --out Icon1.iconset/icon_512x512@2x.png
+# iconutil -c icns Icon1.iconset
+# rm -R Icon1.iconset
+
+# mkdir Icon2.iconset
+# sips -z 16 16     Icon2.png --out Icon2.iconset/icon_16x16.png
+# sips -z 32 32     Icon2.png --out Icon2.iconset/icon_16x16@2x.png
+# sips -z 32 32     Icon2.png --out Icon2.iconset/icon_32x32.png
+# sips -z 64 64     Icon2.png --out Icon2.iconset/icon_32x32@2x.png
+# sips -z 128 128   Icon2.png --out Icon2.iconset/icon_128x128.png
+# sips -z 256 256   Icon2.png --out Icon2.iconset/icon_128x128@2x.png
+# sips -z 256 256   Icon2.png --out Icon2.iconset/icon_256x256.png
+# sips -z 512 512   Icon2.png --out Icon2.iconset/icon_256x256@2x.png
+# sips -z 512 512   Icon2.png --out Icon2.iconset/icon_512x512.png
+# sips -z 1024 1024   Icon2.png --out Icon2.iconset/icon_512x512@2x.png
+# iconutil -c icns Icon2.iconset
+# rm -R Icon2.iconset
+
+# mkdir Icon3.iconset
+# sips -z 16 16     Icon3.png --out Icon3.iconset/icon_16x16.png
+# sips -z 32 32     Icon3.png --out Icon3.iconset/icon_16x16@2x.png
+# sips -z 32 32     Icon3.png --out Icon3.iconset/icon_32x32.png
+# sips -z 64 64     Icon3.png --out Icon3.iconset/icon_32x32@2x.png
+# sips -z 128 128   Icon3.png --out Icon3.iconset/icon_128x128.png
+# sips -z 256 256   Icon3.png --out Icon3.iconset/icon_128x128@2x.png
+# sips -z 256 256   Icon3.png --out Icon3.iconset/icon_256x256.png
+# sips -z 512 512   Icon3.png --out Icon3.iconset/icon_256x256@2x.png
+# sips -z 512 512   Icon3.png --out Icon3.iconset/icon_512x512.png
+# sips -z 1024 1024   Icon3.png --out Icon3.iconset/icon_512x512@2x.png
+# iconutil -c icns Icon3.iconset
+# rm -R Icon3.iconset
+
+# mkdir Icon4.iconset
+# sips -z 16 16     Icon4.png --out Icon4.iconset/icon_16x16.png
+# sips -z 32 32     Icon4.png --out Icon4.iconset/icon_16x16@2x.png
+# sips -z 32 32     Icon4.png --out Icon4.iconset/icon_32x32.png
+# sips -z 64 64     Icon4.png --out Icon4.iconset/icon_32x32@2x.png
+# sips -z 128 128   Icon4.png --out Icon4.iconset/icon_128x128.png
+# sips -z 256 256   Icon4.png --out Icon4.iconset/icon_128x128@2x.png
+# sips -z 256 256   Icon4.png --out Icon4.iconset/icon_256x256.png
+# sips -z 512 512   Icon4.png --out Icon4.iconset/icon_256x256@2x.png
+# sips -z 512 512   Icon4.png --out Icon4.iconset/icon_512x512.png
+# sips -z 1024 1024   Icon4.png --out Icon4.iconset/icon_512x512@2x.png
+# iconutil -c icns Icon4.iconset
+# rm -R Icon4.iconset
+
+mkdir Icon5.iconset
+sips -z 16 16     Icon5.png --out Icon5.iconset/icon_16x16.png
+sips -z 32 32     Icon5.png --out Icon5.iconset/icon_16x16@2x.png
+sips -z 32 32     Icon5.png --out Icon5.iconset/icon_32x32.png
+sips -z 64 64     Icon5.png --out Icon5.iconset/icon_32x32@2x.png
+sips -z 128 128   Icon5.png --out Icon5.iconset/icon_128x128.png
+sips -z 256 256   Icon5.png --out Icon5.iconset/icon_128x128@2x.png
+sips -z 256 256   Icon5.png --out Icon5.iconset/icon_256x256.png
+sips -z 512 512   Icon5.png --out Icon5.iconset/icon_256x256@2x.png
+sips -z 512 512   Icon5.png --out Icon5.iconset/icon_512x512.png
+sips -z 1024 1024   Icon5.png --out Icon5.iconset/icon_512x512@2x.png
+iconutil -c icns Icon5.iconset
+rm -R Icon5.iconset
