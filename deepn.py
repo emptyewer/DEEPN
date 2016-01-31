@@ -13,7 +13,6 @@ import functions.message as m
 from PyQt4 import QtCore, QtGui, uic
 
 app = QtGui.QApplication(sys.argv)
-print os.path.dirname(os.path.realpath(__file__))
 form_class, base_class = uic.loadUiType(os.path.join('ui', 'DEEPN.ui'))
 
 class vQlistWidgetItem(QtGui.QListWidgetItem):
@@ -43,7 +42,7 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
                          self.process_data_layout_2, self.process_data_layout_3,
                          self.process_data_layout_4, self.status_layout]
         self.window = self.window()
-        self.window.setGeometry(0, 0, self.width(), self.height())
+        self.window.setGeometry(10, 30, self.width(), self.height())
         self.buttons = []
         self.thread = None
         self.message = m.Message_Dialog()
@@ -307,7 +306,10 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
                 self.check_path(self.directory, ['gene_count_summary', 'chromosome_files'])
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
-                self.process.start('Gene Count.app/Contents/MacOS/Gene Count', [self.directory, self.gene_dictionary,
+                if sys.platform == 'win32':
+                    self.process.start('Gene Count\Gene Count.exe', [self.directory, self.gene_dictionary, self.chromosome_list])
+                elif sys.platform == 'darwin':
+                    self.process.start('Gene Count.app/Contents/MacOS/Gene Count', [self.directory, self.gene_dictionary,
                                                                                 self.chromosome_list])
                 # self.process.start('python', ['gene_count_gui.py', self.directory, self.gene_dictionary, self.chromosome_list])
             else:
@@ -325,7 +327,12 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
                 self.check_path(self.directory, ['junction_files', 'blast_results', 'blast_results_query'])
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
-                self.process.start('Junction Make.app/Contents/MacOS/Junction Make',
+                if sys.platform == 'win32':
+                    self.process.start('Junction Make\Junction Make.exe',
+                                [self.directory, str(self.junction_sequence_txt.text()),
+                                str(self.exclude_sequence_txt.text()), self.blast_db_name])
+                elif sys.platform == 'darwin':
+                    self.process.start('Junction Make.app/Contents/MacOS/Junction Make',
                                 [self.directory, str(self.junction_sequence_txt.text()),
                                 str(self.exclude_sequence_txt.text()), self.blast_db_name])
                 # self.process.start('python', ['junction_make_gui.py', self.directory, str(self.junction_sequence_txt.text()),
@@ -344,7 +351,16 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
                 self.check_path(self.directory, ['junction_files', 'blast_results', 'blast_results_query', 'gene_count_summary', 'chromosome_files'])
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
-                self.process.start('GCJM.app/Contents/MacOS/GCJM', [self.directory,
+                if sys.platform == 'win32':
+                    self.process.start('GCJM/GCJM.exe', [self.directory,
+                                                                self.gene_dictionary, self.chromosome_list,
+                                                                str(self.junction_sequence_txt.text()),
+                                                                str(self.exclude_sequence_txt.text()),
+                                                                self.blast_db_name,
+                                                                'Gene Count\Gene Count.exe',
+                                                                'Junction Make\Junction Make.exe'])
+                elif sys.platform == 'darwin':
+                    self.process.start('GCJM.app/Contents/MacOS/GCJM', [self.directory,
                                                                 self.gene_dictionary, self.chromosome_list,
                                                                 str(self.junction_sequence_txt.text()),
                                                                 str(self.exclude_sequence_txt.text()),
@@ -363,8 +379,11 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             self.clicked_button = self.sender()
             self.clicked_button_text = self.clicked_button.text()
             self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
-            self.process.start('Blast Query.app/Contents/MacOS/Blast Query', [self.directory,
-                                                                              self.gene_list_file])
+            if sys.platform == 'win32':
+                self.process.start('Blast Query\Blast Query.exe', [self.directory, self.gene_list_file])
+            elif sys.platform == 'darwin':
+                self.process.start('Blast Query.app/Contents/MacOS/Blast Query', [self.directory,
+                                                                                  self.gene_list_file])
         elif self.clicked_button == self.sender():
             self.process.terminate()
 
@@ -374,8 +393,12 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             self.clicked_button = self.sender()
             self.clicked_button_text = self.clicked_button.text()
             self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
-            self.process.start('Read Depth.app/Contents/MacOS/Read Depth', [self.directory,
-                                                                            self.gene_list_file])
+            if sys.platform == 'win32':
+                self.process.start('Read Depth/Read Depth.exe', [self.directory,
+                                                                 self.gene_list_file])
+            elif sys.platform == 'darwin':
+                self.process.start('Read Depth.app/Contents/MacOS/Read Depth', [self.directory,
+                                                                                self.gene_list_file])
         elif self.clicked_button == self.sender():
             self.process.terminate()
 

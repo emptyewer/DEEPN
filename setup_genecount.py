@@ -5,8 +5,14 @@ Usage:
     python setup.py py2app --includes sip
 """
 import os
+import sys
 import glob
 from setuptools import setup
+if sys.platform == 'darwin':
+    import py2app
+elif sys.platform == 'win32':
+    import py2exe
+sys.setrecursionlimit(100000)
 
 def find_data_files(sources, targets, patterns):
     """Locates the specified data-files and returns the matches
@@ -35,6 +41,8 @@ def find_data_files(sources, targets, patterns):
 
 
 APP = ['gene_count_gui.py']
+INCLUDES = ['PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc',
+                                                'json', 'numbers', 'hashlib', 'decimal', 'pyqtgraph']
 OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon2.icns',
            'plist': {'CFBundleGetInfoString': 'Gene Count',
@@ -43,18 +51,38 @@ OPTIONS = {'argv_emulation': True,
                      'CFBundleName': 'Gene Count',
                      'CFBundleVersion': '10',
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
-           'includes': ['PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc',
-                                                'json', 'numbers', 'hashlib', 'decimal', 'pyqtgraph'],
+           'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
            }
-
-setup(
-    app=APP,
-    name='Gene Count',
-    options={'py2app': OPTIONS},
-    setup_requires=['py2app'],
-    author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
-    data_files=find_data_files(['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', '.'],
-                               ['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', ''],
-                               ['*.py', '*.py', '*.py', '*.ui', '*', '*.txt'])
-)
+DATA_FILES = find_data_files(['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', '.'],
+                             ['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', ''],
+                             ['*.py', '*.py', '*.py', '*.ui', '*', '*.txt'])
+if sys.platform == 'darwin':
+    setup(
+        app=APP,
+        name='Gene Count',
+        options={'py2app': OPTIONS},
+        setup_requires=['py2app'],
+        author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
+        data_files=DATA_FILES,
+    )
+elif sys.platform == 'win32':
+    origIsSystemDLL = py2exe.build_exe.isSystemDLL
+    def isSystemDLL(pathname):
+            if os.path.basename(pathname).lower() in ("msvcp71.dll", "dwmapi.dll", "'msvcp90.dll'"):
+                    return 0
+            return origIsSystemDLL(pathname)
+    py2exe.build_exe.isSystemDLL = isSystemDLL
+    setup(
+        windows=[{"script":'gene_count_gui.py',
+                   "icon_resources": [(1, "icon/Icon2.ico")],
+                   "dest_base":"Gene Count"
+                }],
+        data_files=DATA_FILES,
+        options={"py2exe": {'includes': INCLUDES,
+                            "optimize": 2,
+                            "compressed": 2,
+                            "bundle_files": 1,
+                            "dist_dir": "dist\Gene Count"
+                            }}
+    )

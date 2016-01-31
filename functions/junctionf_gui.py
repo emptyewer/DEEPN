@@ -104,7 +104,7 @@ class junctionf():
         sys.stdout.flush()
         for file_name in self.fileio.get_file_list(directory, blast_results_folder, ".fa"):
             output_file = os.path.join(directory, blast_results_folder, file_name + '.blast.txt')
-            blast_command_list = [os.path.join(blast_path, 'blastnY2H' + suffix),
+            blast_command_list = [os.path.join(blast_path, 'blastn' + suffix),
                                   '-query', os.path.join(directory, 'blast_results', file_name), '-db', db_path,
                                   '-task',  'blastn', '-dust', 'no', '-num_threads', str(Parallel.cpu_count()),
                                   '-outfmt', '7', '-out', output_file, '-evalue', '0.2', '-max_target_seqs', '10']

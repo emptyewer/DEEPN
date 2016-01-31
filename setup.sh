@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 rm -rf dist/*
 rm -rf build/*
+unzip lists/mm10GeneList.prn.zip lists/mm10GeneList.prn
+unzip lists/sacCer3GeneBordersIntrons.prn.zip lists/sacCer3GeneBordersIntrons.prn
 /usr/bin/python setup_deepn.py py2app --includes sip
 /usr/bin/python setup_genecount.py py2app --includes sip
 /usr/bin/python setup_junctionmake.py py2app --includes sip

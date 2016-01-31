@@ -1,6 +1,12 @@
 import os
+import sys
 import glob
 from setuptools import setup
+if sys.platform == 'darwin':
+    import py2app
+elif sys.platform == 'win32':
+    import py2exe
+sys.setrecursionlimit(100000)
 
 def find_data_files(sources, targets, patterns):
     """Locates the specified data-files and returns the matches
@@ -29,6 +35,8 @@ def find_data_files(sources, targets, patterns):
 
 
 APP = ['query_blast_gui.py']
+INCLUDES =['PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc',
+                        'json', 'numbers', 'hashlib', 'decimal', 'csv', 'collections', 'pyqtgraph', 'numpy']
 OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon4.icns',
            'plist': {'CFBundleGetInfoString': 'Blast Query',
@@ -37,19 +45,39 @@ OPTIONS = {'argv_emulation': True,
                      'CFBundleName': 'Blast Query',
                      'CFBundleVersion': '10',
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
-           'includes': ['PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc',
-                        'json', 'numbers', 'hashlib', 'decimal', 'csv', 'collections', 'pyqtgraph', 'numpy'],
+           'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript',
                         'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
            }
-
-setup(
-    app=APP,
-    name='Blast Query',
-    options={'py2app': OPTIONS},
-    setup_requires=['py2app'],
-    author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
-    data_files=find_data_files(['functions', 'libraries/xlsxwriter', 'lists', 'ui', '.'],
+DATA_FILES = find_data_files(['functions', 'libraries/xlsxwriter', 'lists', 'ui', '.'],
                                ['functions', 'libraries/xlsxwriter', 'lists', 'ui', ''],
-                               ['*.py', '*.py', '*', '*.ui', '*.txt'])
-)
+                               ['*.py', '*.py', '*.prn', '*.ui', '*.txt'])
+if sys.platform == 'darwin':
+    setup(
+        app=APP,
+        name='Blast Query',
+        options={'py2app': OPTIONS},
+        setup_requires=['py2app'],
+        author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
+        data_files=DATA_FILES,
+    )
+elif sys.platform == 'win32':
+    origIsSystemDLL = py2exe.build_exe.isSystemDLL
+    def isSystemDLL(pathname):
+            if os.path.basename(pathname).lower() in ("msvcp71.dll", "dwmapi.dll", "'msvcp90.dll'"):
+                    return 0
+            return origIsSystemDLL(pathname)
+    py2exe.build_exe.isSystemDLL = isSystemDLL
+    setup(
+        windows=[{"script":'query_blast_gui.py',
+                   "icon_resources": [(1, "icon/Icon4.ico")],
+                   "dest_base":"Blast Query"
+                }],
+        data_files=DATA_FILES,
+        options={"py2exe": {'includes': INCLUDES,
+                            "optimize": 2,
+                            "compressed": 2,
+                            "bundle_files": 1,
+                            "dist_dir": "dist\Blast Query"
+                            }}
+    )
