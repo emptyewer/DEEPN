@@ -307,11 +307,12 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
                 if sys.platform == 'win32':
+                    # self.process.start('python', ['gene_count_gui.py', self.directory, self.gene_dictionary, self.chromosome_list])
                     self.process.start('Gene Count\Gene Count.exe', [self.directory, self.gene_dictionary, self.chromosome_list])
                 elif sys.platform == 'darwin':
                     self.process.start('Gene Count.app/Contents/MacOS/Gene Count', [self.directory, self.gene_dictionary,
                                                                                 self.chromosome_list])
-                # self.process.start('python', ['gene_count_gui.py', self.directory, self.gene_dictionary, self.chromosome_list])
+                    # self.process.start('python', ['gene_count_gui.py', self.directory, self.gene_dictionary, self.chromosome_list])
             else:
                 self.process_finished()
         elif self.clicked_button == self.sender():
