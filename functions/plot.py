@@ -152,7 +152,7 @@ class QBPlot(QtGui.QDialog, form_class):
         style = pg.PlotDataItem(pen=pg.mkPen({'color':'1CC5FF','width': 4}))
         self.plot_widget.plotItem.legend.addItem(style, "Upstream")
         style = pg.PlotDataItem(pen=pg.mkPen({'color':'777777','width': 4}))
-        self.plot_widget.plotItem.legend.addItem(style, "Downstream")
+        self.plot_widget.plotItem.legend.addItem(style, "Downstream / Out of Frame")
         style = pg.PlotDataItem(pen=pg.mkPen({'color':'D13A26','width': 4}))
         self.plot_widget.plotItem.legend.addItem(style, "Start/Stop of CDS")
 
