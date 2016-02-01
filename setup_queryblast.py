@@ -69,6 +69,9 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
+        version='1.0',
+        description='Query Blast',
+        author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'query_blast_gui.py',
                    "icon_resources": [(1, "icon/Icon4.ico")],
                    "dest_base":"Blast Query"

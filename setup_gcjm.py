@@ -37,6 +37,9 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
+        version='1.0',
+        description='GCJM',
+        author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'gc_jm.py',
                    "icon_resources": [(1, "icon/Icon1.ico")],
                    "dest_base":"GCJM"

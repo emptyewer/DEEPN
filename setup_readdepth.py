@@ -68,6 +68,9 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
+        version='1.0',
+        description='Read Depth',
+        author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'read_depth_gui.py',
                    "icon_resources": [(1, "icon/Icon5.ico")],
                    "dest_base":"Read Depth"
