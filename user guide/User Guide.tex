@@ -1,0 +1,569 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The Legrand Orange Book
+% LaTeX Template
+% Version 2.1 (14/11/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Mathias Legrand (legrand.mathias@gmail.com) with modifications by:
+% Vel (vel@latextemplates.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+% Compiling this template:
+% This template uses biber for its bibliography and makeindex for its index.
+% When you first open the template, compile it from the command line with the 
+% commands below to make sure your LaTeX distribution is configured correctly:
+%
+% 1) pdflatex main
+% 2) makeindex main.idx -s StyleInd.ist
+% 3) biber main
+% 4) pdflatex main x 2
+%
+% After this, when you wish to update the bibliography/index use the appropriate
+% command above and make sure to compile with pdflatex several times 
+% afterwards to propagate your changes to the document.
+%
+% This template also uses a number of packages which may need to be
+% updated to the newest versions for the template to compile. It is strongly
+% recommended you update your LaTeX distribution if you have any
+% compilation errors.
+%
+% Important note:
+% Chapter heading images should have a 2:1 width:height ratio,
+% e.g. 920px width and 460px height.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt,fleqn]{book} % Default font size and left-justified equations
+\usepackage[dvipsnames]{xcolor}
+\usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{textcomp}
+\usepackage{smartdiagram}
+\usepackage{texshade}
+%----------------------------------------------------------------------------------------
+\lstset{frame=tb,
+  language=Bash,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{black},
+  keywordstyle=\color{black},
+  commentstyle=\color{black},
+  stringstyle=\color{black},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\input{structure} % Insert the commands.tex file which contains the majority of the structure behind the template
+
+
+\newcommand{\GeneCount}{{\color{Red} Gene Count }}
+\newcommand{\JunctionMake}{{\color{Blue} Junction Make }}
+\newcommand{\BlastQuery}{{\color{ForestGreen} Blast Query }}
+\newcommand{\ReadDepth}{{\color{Bittersweet} Read Depth }}
+\newcommand{\DEEPN}{\textbf{DEEPN }}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begingroup
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+\coordinate [below=12cm] (midpoint) at (current page.north);
+\node at (current page.north west)
+{\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=north west,inner sep=0pt] at (0,0) {\includegraphics[width=\paperwidth]{background}}; % Background image
+\draw[anchor=north] (midpoint) node [fill=ocre!30!white,fill opacity=0.6,text opacity=1,inner sep=1cm]{\Huge\centering\bfseries\sffamily\parbox[c][][t]{\paperwidth}{\centering DEEPN 1.0\\[15pt] % Book title
+{\Large Illumina Data Processing}\\[20pt] % Subtitle
+{\huge Dr. Venkatramanan Krishnamani\\Dr. Robert C. Piper\\Dr. Mark Stammnes}}}; % Author name
+\end{tikzpicture}};
+\end{tikzpicture}
+\vfill
+\endgroup
+
+%----------------------------------------------------------------------------------------
+%	COPYRIGHT PAGE
+%----------------------------------------------------------------------------------------
+
+\newpage
+~\vfill
+\thispagestyle{empty}
+
+%\noindent Copyright \copyright\ 2014 Andrea Hidalgo\\ % Copyright notice
+\noindent \textsc{This software is provided under ``The MIT License'' (MIT). \emph{See Section \ref{license}}}\\
+
+\noindent \textsc{Department of Molecular Physiology and Biophysics, University of Iowa}\\
+
+\noindent \textsc{https://github.com/emptyewer/DEEPN/releases}\\ % URL
+
+\noindent This research was performed .... a grant awarded to .... by National Institute of Health.\\ % License information
+
+\noindent \textit{First release, January 2016} % Printing/edition date
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+\chapterimage{chapter_head_1.pdf} % Table of contents heading image
+
+\pagestyle{empty} % No headers
+
+\tableofcontents % Print the table of contents itself
+
+\cleardoublepage % Forces the first chapter to start on an odd page so it's on the right
+
+\pagestyle{fancy} % Print headers again
+
+%----------------------------------------------------------------------------------------
+%	PART
+%----------------------------------------------------------------------------------------
+
+\part{DEEPN Overview}
+
+%----------------------------------------------------------------------------------------
+%	CHAPTER 1
+%----------------------------------------------------------------------------------------
+
+\chapterimage{chapter_head_1.pdf} % Chapter heading image
+
+\chapter{DEEPN Overview}
+
+\section{About DEEPN}\index{About DEEPN}
+The \DEEPN bioinformatics workflow is a collection of 4 programs
+
+% \begin{wrapfigure}{l}{0.25\textwidth}
+% 	\includegraphics[width=0.9\linewidth]{Pictures/gene_count.png} 
+% 	\caption{Caption1}
+% 	\label{fig:subim1}
+% 	\end{wrapfigure}
+\includegraphics[scale=0.3]{Pictures/gene_count.png} \GeneCount counts the number of sequence reads found for every gene.\\
+
+\includegraphics[scale=0.3]{Pictures/junction_make.png} \JunctionMake finds and identifies all the sequences corresponding to the junction sequences that span the end of the bait plasmid with the cDNA insert in the library “prey” plasmid.\\
+
+\includegraphics[scale=0.3]{Pictures/query_blast.png} \BlastQuery allows the junction sequences to be analyzed.\\
+
+\includegraphics[scale=0.3]{Pictures/read_depth.png} \ReadDepth calculates the read depth for a particular cDNA, useful for \\predicting the 3’ end of a cDNA insert.
+
+\vspace{15pt}
+
+\DEEPN was developed to process and analyze sequence information from the Illumina platform that produces 110-140 bp reads.  Both single and paried-end sequences are appropriate, \DEEPN considers the different sides of a paried-end sequence as two separate sequences. \DEEPN requires sequence files in \texttt{.sam} format, in which sequences have been mapped to the genome.  Processing of .fastq sequence files with \texttt{Tophat2} will work, producing unmapped and mapped \texttt{.sam} files for each fastq read file. \DEEPN requires BOTH mapped and unmapped \texttt{.sam} files to fully analyze a sequence dataset. See Section \ref{download link} for download link.
+
+\clearpage
+\begin{remark}
+	Later releases of DEEPN for Mac will also contain functions to automatically map \texttt{.fastq} files with Tophat2 to allow for seamless integration of processing sequence data.\\
+
+	\texttt{.fastq} $\,\to\,$ Tophat2/Bowtie $\,\to\,$ \GeneCount $\,\to\,$ {\color{Blue} Junction Make} $\,\to\,$ {\color{ForestGreen} Blast Query} $\,\to\,$  {\color{Bittersweet} Read Depth}.  
+\end{remark}
+
+
+The \DEEPN application provides a graphic user interface to guide the launch and operation of \GeneCount, \JunctionMake, \BlastQuery, or \ReadDepth modules within it. \DEEPN comes in versions that run on Windows and Mac operating systems. See Section \ref{download link} for download link.
+
+This user guide describes use of the standalone \DEEPN application and how to operate the modules within it.
+
+
+\section{Contents within DEEPN}\index{Contents within DEEPN}
+
+\begin{enumerate}
+\item Program modules
+	\begin{itemize} 
+		\item {\color{Red} Gene Count}
+		\item {\color{Blue} Junction Make}
+		\item {\color{ForestGreen} Blast Query}
+		\item {\color{Bittersweet} Read Depth}
+	\end{itemize}
+which are launched from within the main DEEPN.app or DEEPN.exe.
+\item Databases for the Gene and mRNA coordinates
+	\begin{itemize} 
+		\item mouse mm10 genome and mouse RefSeq data
+		\item Gene and ORF coordinates for the SacCer3 genome
+	\end{itemize}
+These allow analysis of mouse cDNA Y2H libraries and yeast genomic Y2H libraries.  The mouse RefSeq database that \DEEPN uses contains just the known annotated mRNAs, basically the entries that have an \texttt{NM\_*} nomenclature in genbank.  It does not contain microRNAs, long non-coding RNAs, and theoretical splice variants. \DEEPN contains a database of yeast genes, with a hybrid nomenclature of their systematic SGD name and their genebank \texttt{NM\_*} nomenclature.  For simplicity, a given yeast gene consists of the protein coding sequence flanked by 100 bp of untranslated region.
+	
+\item Database of ``junction tags'' for different libraries.  Currently, analysis of the mouse mm10 data defaults to the use of the Clontech mate/plate pGADT7 plasmid.  And analysis of the yeast libraries is tied to the Phil James libraries housed in pGAD-C1, C2, and C3. These default junction tags are:
+	\begin{itemize} 
+		\item cDNA insert (mouse)
+		\begin{lstlisting}
+		AATTCCACCCAAGCAGTGGTATCAACGCAGAGTGGCCATTACGGCCGGGG
+		\end{lstlisting}
+		\item genomic fragment insert (\emph{S. cerevisiae})
+		\begin{lstlisting}
+		ATACCCCACCAAACCCAAAAAAAGAGATCGAATTCCCCGGGGGATCCATC
+		\end{lstlisting}
+	\end{itemize}
+	\begin{remark} 
+		Users can insert their own junction sequence into the \DEEPN dialog box if using a different library.  For a more permanent solution, users can modify the SQL database that houses these data (see below)
+	\end{remark}
+\item \DEEPN operates the \texttt{blastn} program while its processing data.  That is called upon by the \JunctionMake program.  All of the relevant files required to blast search mouse mRNAs or yeast genes are included in internal resources.  Stand-alone Blastn program and associated databases to perform \texttt{blastn} locally from within the \DEEPN application.
+\end{enumerate}
+
+
+\section{DEEPN WorkFlow Overview}\index{DEEPN Workflow Overview}
+
+\begin{center}
+	\smartdiagram[descriptive diagram]{
+		{Select \textbf{Work Folder}, Locate a folder in your computer where you like the analysis to be performed.},
+		{Place \texttt{.sam} files, Place .sam files within the \textbf{mapped\_sam\_files} and \textbf{unmapped\_sam\_files} subfolders within the selected \textbf{Work Folder}.},
+		{Process Data, Use \GeneCount and \JunctionMake to process data. This will create several subfolders containing the processed data},
+		{Analyze Data, {Using \BlastQuery and \ReadDepth}},
+	}
+\end{center}
+Step-by-step screen-shots and instructions are detailed in the following chapters.
+
+
+%------------------------------------------------
+
+\section{Installation}\index{Installation}
+\subsection{Download Link}\label{download link}
+
+    Platform-specific compiled binaries (\emph{Mac OS X, Windows and Linux}) of \textbf{DEEPN} can be downloaded from the below URL. \\
+
+    \texttt{\href{https://github.com/emptyewer/DEEPN/releases}{https://github.com/emptyewer/DEEPN/releases}}
+
+    \subsection{Mac OS X Compatibility}\index{Mac OS X Compatibility}\label{mac_install}
+
+    \texttt{Mac OS X (10.10+) Yosemite and above}
+
+    \subsection{Windows Compatibility}\index{Windows Compatibility}\label{windows_install}
+
+    \texttt{64-bit or 32 bit Windows 7 and above. Note that \DEEPN itself is a 32-bit software.}
+
+    \subsection{Linux Compatibility}\index{Linux Compatibility}\label{linux_install}
+
+    \texttt{Scheduled for release in Version 2.0 of DEEPN.}
+
+\section{Open Source License}\index{Open Source License}\label{license}
+\begin{lstlisting}
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+\end{lstlisting}
+
+
+\chapter{Initial Setup}
+
+\section{Preprocessing \texttt{.fastq files}}\index{Preprocessing \texttt{.fastq files}}
+
+The current DEEPN application requires that \texttt{.sam} files have been generated from the \texttt{.fastq} illumine sequence files.  This is done using the mapping program \texttt{Tophat2} that uses \texttt{Bowtie}.  It is imperative that downstream processing by DEEPN uses the same databases that \texttt{Tophat2} uses to map the sequence files. These are...
+
+\begin{enumerate}
+	\item Mouse: mm10\/GRCm38 2011 \emph{Mus musculus} assembly (Genome Reference Consortium Mouse Build 38 (\texttt{GCA\_000001635.2})\\
+	\texttt{\href{https://goo.gl/T6OT2F}{https://goo.gl/T6OT2F}}
+	\item Yeast: sacCer3 2011 \emph{Saccharomyces cerevisiae} S288c assembly from Saccharomyces Genome Database (\texttt{GCA\_000146055.2})\\
+	\texttt{\href{https://goo.gl/wfPbvA}{https://goo.gl/wfPbvA}}
+\end{enumerate}
+
+\texttt{Tophat2} should produce sets of .sam files of Mapped Reads and Unmapped Reads for every input .fastq file.  DEEPN will use both of these files.
+
+\section{Initializing DEEPN}\index{Initializing DEEPN}
+
+\subsection{Launching}
+Open the \DEEPN application by double clicking. This opens a window (DEEPN) that can be used to run the other modules.
+\begin{itemize}
+	\item[\textbf{Step 1.}] \textbf{Select Parameters from the list menu in the top. Figure \ref{fig:deepn_main_window}}
+	\begin{itemize}
+		\item Selecting the M. musculus option selects the mm10 mouse databases
+		\item Selecting the S. cerevisiae option selects the sacCer3 databases
+		\item Once this is selected, the “Select Work Folder” will be activated for use
+	\end{itemize}
+	\begin{figure}[!ht]
+	    \centering
+	    \includegraphics[width=0.8\textwidth]{figure1}
+	    \caption{\DEEPN main interface.}
+	    \label{fig:deepn_main_window}
+    \end{figure}
+	\item[\textbf{Step 2.}] \textbf{Create a work folder Figure \ref{fig:select_work_folder}}
+
+	\begin{itemize}
+		\item \DEEPN needs a folder to write its files into and to read sequence files from.  This is done using the ``Select Work Folder'' button \includegraphics[width=80pt]{Pictures/work_folder_btn}. Here create a new folder or select an existing one.
+		\item Once your Work Folder is designated, \DEEPN will need to operate from two subfolders within it (See Figure \ref{fig:select_work_folder}). These folders are called...
+		\begin{itemize}
+			\item \texttt{mapped\_sam\_files}
+			\item \texttt{unmapped\_sam\_files} 
+		\end{itemize}
+		\item If these folders already exist within the ``Work Folder'' because of previous processing, then \DEEPN will use them.
+		\item If the ``Work Folder'' is new and those folders do not exist, \DEEPN will create them.
+	\end{itemize}
+	\begin{figure}[!ht]
+	    \centering
+	    \includegraphics[width=0.8\textwidth]{work_folder}
+	    \caption{Folder with two subfolders, named \texttt{mapped\_sam\_files} and \texttt{unmapped\_sam\_files} is the starting state of \DEEPN work folder before processing.}
+	    \label{fig:select_work_folder}
+    \end{figure}
+
+    \item[\textbf{Step 3.}] To start things off, move your \texttt{.sam} files generated by \underline{Tophat2} into the \texttt{mapped\_sam\_files} and \texttt{unmapped\_sam\_files} folders.
+\end{itemize}
+
+\includegraphics[scale=0.3]{Pictures/gene_count.png} \GeneCount module will process the \texttt{.sam} files placed in the \texttt{mapped\_sam\_files} folder. These files should contain the mapped read files outputted from \underline{Tophat2}\\
+
+\includegraphics[scale=0.3]{Pictures/junction_make.png} \JunctionMake module will process the \texttt{.sam} files placed in the \texttt{unmapped\_sam\_files} folder. These files should contain the \underline{UNmapped} read files outputted from \underline{Tophat2}.  These are the reads that were unable to to mapped adequately to the \textbf{SacCer3} or the \textbf{Mm10} genomes and that contains the bulk of junction reads. With Illumina 110-120 bp reads, the stretch of cDNA or gene DNA in these ``Junction sequences'' is too short to be mapped to a chromosome by \underline{Tophat2}. This workflow assumes these types of short reads.  Were one to have longer reads, the Junction Sequences might be able to be mapped, which would oblige the search for them to included the Mapped reads as well.\\
+
+\begin{itemize}
+	\item Once \texttt{.sam} files are placed within \texttt{mapped\_sam\_files}, the \includegraphics[width=120pt]{Pictures/gene_count_btn} button is activated and the \GeneCount processing can begin by clicking the button.
+	\item Once \texttt{.sam} files are placed within \texttt{unmapped\_sam\_files}, the \includegraphics[width=120pt]{Pictures/junction_make_btn} button is activated and the \JunctionMake processing can begin by clicking the button.
+\end{itemize}
+
+\begin{remark}
+A warning message may appear if \DEEPN detects folders created by previous processing runs. \DEEPN will add to these folders, but users run the risk that if file names are the same, the old files will be written over by the new files. To avoid any problems, one can move the processed data folders to a new location.
+\end{remark}
+
+%----------------------------------------------------------------------------------------
+%	PART
+%----------------------------------------------------------------------------------------
+
+\part{Processing Data}
+
+%----------------------------------------------------------------------------------------
+%	CHAPTER 3
+%----------------------------------------------------------------------------------------
+
+\chapterimage{chapter_head_1.pdf} % Chapter heading image
+
+\chapter{\GeneCount}\index{Gene Count}
+
+\GeneCount will process all the \texttt{.sam} files that are in the folder \texttt{mapped\_sam\_files}
+
+\vspace{15pt}
+
+Once the \texttt{.sam} files are moved to this folder, click the \includegraphics[width=120pt]{Pictures/gene_count_btn} button.
+
+\begin{remark}
+Clicking the \includegraphics[width=120pt]{Pictures/gene_count_btn} button will only be possible if there are files in \texttt{mapped\_sam\_files} folder.
+\end{remark}
+
+After starting, \GeneCount will report to you the following:
+
+\begin{lstlisting}
+>>>GENEcountY2H
+Gene Count will process the mapped .sam files present in the folder mapped_sam_files
+Gene Count will generate two folders for its output data:
+gene_count_summary contains a summary files of genes and their count frequency. 
+chromosome_files contains more granular data for each gene.
+
+Be patient....This program is slow but will keep you posted.
+>>>END
+\end{lstlisting}
+
+\GeneCount will populate the \texttt{gene\_count\_summary} and \texttt{chromosome\_files} folders with files that have names corresponding to the input files. 
+
+For an input file named \textbf{\texttt{Dataset1.sam}}
+\begin{itemize}
+	\item The \texttt{gene\_count\_summary} folder will contain \textbf{\texttt{Dataset1\_summary.csv}}
+	\item The \texttt{chromosome\_files} folder will contain \textbf{\texttt{Dataset1\_ChrGene.csv}}
+\end{itemize}
+
+\vspace{15pt}
+The \texttt{\_summary.csv} files generated by \GeneCount have the following format when opened in \texttt{Microsoft Excel}. See Figure \ref{fig:excel_screen_shot}.
+
+\begin{itemize}
+	\item The name of the \texttt{.sam} file processed is found along the top.
+	\item \textbf{Column A} shows Chromosome on which each gene is located
+	\item \textbf{Column B} shows gene name
+	\item \textbf{Column C} shows the frequency of reads for that gene in parts per million (PPM)
+	\item \textbf{Columns D and greater} show corresponding NCBI genbank accession numbers that describe annotated mRNA sequences for that gene
+\end{itemize}
+
+Shown are the ``Total Mapped Reads'' that were found in the starting \texttt{.sam} file (TotalReads). Also shown are the ``Total Mapped Reads'' that were used in the PPM calculation (TotalReads(PPM))
+
+\begin{remark}
+TotalReads(PPM)) is the number of reads that were found to have a position corresponding to a known exon as annotated in the corresponding database used. Since some exons have yet to be annotated, some of the reads may not be able to be assigned to a particular gene, which accounts for the discrepancy between TotalReads(PPM) and TotalReads.
+\end{remark}
+
+
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{excel}
+    \caption{Screen-shot of \texttt{\_summary.csv} file generated by \GeneCount.}
+    \label{fig:excel_screen_shot}
+\end{figure}
+
+
+
+\chapter{\JunctionMake}\index{Junction Make}
+
+\JunctionMake will process all the \texttt{.sam} files that are in the folder \texttt{unmapped\_sam\_files}.
+
+\vspace{15pt}
+
+Once the \texttt{.sam} files are moved to this folder, click the \includegraphics[width=120pt]{Pictures/junction_make_btn} button.
+
+\begin{remark}
+Clicking the \includegraphics[width=120pt]{Pictures/junction_make_btn} button will only be possible if there are files in \texttt{unmapped\_sam\_files} folder.
+\end{remark}
+
+
+\JunctionMake will report to you the following:
+
+\begin{lstlisting}
+>>>Comment1
+- Make sure all ".SAM" files from your UNmapped reads are in the folder:
+unmapped_sam_files
+- This program will scan for junction sequences that span the Gal4 activation domain and the prey.
+- The junction tag sequence used will be the one entered in the Junction Sequence textbox
+- Output files will be placed in the junction_files folder as .junctions.txt files. 
+- Blast identified reads will be placed in the blast_results folder as .blast.txt files
+- A database of identified junctions will be placed in the blast_results_query folder as .p files
+>>>END
+\end{lstlisting}
+
+
+
+\JunctionMake  will make the \texttt{junction\_files}, \texttt{blast\_results}, and \texttt{blast\_results\_query} folders to accept the new files it will produce. If these folders already exist, a warning will be issued to alert the user that files might be overwritten if \JunctionMake is run again. To avoid this, move the files out of the \texttt{junction\_files}, \texttt{blast\_results}, and \texttt{blast\_results\_query} folders to a new place or Abort, rename the \texttt{junction\_files}, \texttt{blast\_results}, and \texttt{blast\_results\_query} folders and start \JunctionMake again.
+
+
+\JunctionMake will look for different junction ``tag'' sequence. When different \texttt{Gal4AD-} libraries are used, here is where some user input may be necessary.
+
+\vspace{15pt}
+
+For the \textbf{clontech mate and plate library} the junction ``tag'' sequence looked for is:
+\begin{lstlisting}
+AATTCCACCCAAGCAGTGGTATCAACGCAGAGTGGCCATTACGGCCGGGG
+\end{lstlisting}
+
+
+So Junction Sequences look like this for the mouse cDNA Mate/Plate pGADT7 library:
+\begin{lstlisting}
+AATTCCACCCAAGCAGTGGTATCAACGCAGAGTGGCCATTACGGCCGGGG||tcg-gac-aac-gca
+\end{lstlisting}
+
+\vspace{15pt}
+
+For the \textbf{yeast genomic Phil James (pGAD-C1,2,3) library} the junction ``tag'' sequence looked for is:
+\begin{lstlisting}
+ATACCCCACCAAACCCAAAAAAAGAGATCGAATTCCCCGGGGGATCCATC
+\end{lstlisting}
+
+So junction sequences look like this for the pGAD-C yeast genomic library:
+\begin{lstlisting}
+ATACCCCACCAAACCCAAAAAAAGAGATCGAATTCCCCGGGGGATCCATC||ggc-gaa-aac-gaa
+\end{lstlisting}
+
+If you need to use another \textbf{Junction Sequence} you can do so by pasting it directly into the textbox labeled ``junction sequence''
+
+\begin{remark}
+A new junction sequence should be 
+\begin{itemize}
+	\item UPPER case and be 50~nt long.
+	\item Be immediately upstream of the cDNA/fragment fusion site
+	\item Have the last 3 nt define a complete codon for the preceding reading frame. In the examples above the last 3 nucleotides define the operative frame (GGG $\,\to\,$ Glycine or ATC $\,\to\,$ Isoleucine)
+\end{itemize}
+
+\end{remark}
+
+\begin{figure}
+\centering
+\caption{AAAA}
+\label{tRNAsequences}
+\begin{texshade}{gene.aln}
+	% \residuesperline*{38}
+	% \vblockspace{-0.4in}
+	\charstretch{1.5}
+	\linestretch{1.5}
+	\hidelegend
+	\nameseq{1}{Junction Sequence}
+	\nameseq{2}{Translation}
+	\shadingmode{functional}
+	\hideconsensus
+	\hidenumbering
+	\shaderegion{1}{33..35}{White}{RoyalBlue}
+	% \shaderegion{2}{34..36}{White}{RoyalBlue}
+	% \shaderegion{1}{72..74}{White}{Red}
+	% \shaderegion{2}{74..76}{White}{Red}
+	% \tintblock{1}{73..74}
+	
+	% \shaderegion{2}{1..7}{Black}{LightYellow}
+	% \shaderegion{2}{66..72}{Black}{LightYellow}
+	% \shaderegion{2}{10..13}{Black}{LightProcessBlue}
+	% \shaderegion{2}{22..25}{Black}{LightProcessBlue}
+	% \shaderegion{2}{27..31}{Black}{LightLimeGreen}
+	% \shaderegion{2}{39..43}{Black}{LightLimeGreen}
+	% \shaderegion{2}{49..53}{Black}{LightLavender}
+	% \shaderegion{2}{61..65}{Black}{LightLavender}
+	
+	% \shaderegion{1}{1..7}{Black}{LightYellow}
+	% \shaderegion{1}{64..71}{Black}{LightYellow}
+	% \shaderegion{1}{10..12}{Black}{LightProcessBlue}
+	% \shaderegion{1}{22..24}{Black}{LightProcessBlue}
+	% \shaderegion{1}{26..30}{Black}{LightLimeGreen}
+	% \shaderegion{1}{38..42}{Black}{LightLimeGreen}
+	% \shaderegion{1}{47..51}{Black}{LightLavender}
+	% \shaderegion{1}{59..63}{Black}{LightLavender}
+	
+	% \feature{ttop}{1}{72..74}{---[Red]}{}
+	% \feature{bbottom}{2}{74..76}{---[Red]}{}
+	% \feature{ttop}{1}{33..35}{---[RoyalBlue]}{}
+	% \feature{bbottom}{2}{34..36}{---[RoyalBlue]}{}
+\end{texshade}
+\end{figure}
+
+\chapter{Running \GeneCount \& \JunctionMake}\index{Running Gene Count \& Junction Make}
+
+%----------------------------------------------------------------------------------------
+%	PART
+%----------------------------------------------------------------------------------------
+
+\part{Analyzing Data}
+
+\chapter{\BlastQuery}\index{Blast Query}
+
+\chapter{\ReadDepth}\index{Read Depth}
+
+% %----------------------------------------------------------------------------------------
+% %	BIBLIOGRAPHY
+% %----------------------------------------------------------------------------------------
+
+% \chapter*{Bibliography}
+% \addcontentsline{toc}{chapter}{\textcolor{ocre}{Bibliography}}
+% \section*{Books}
+% \addcontentsline{toc}{section}{Books}
+% \printbibliography[heading=bibempty,type=book]
+% \section*{Articles}
+% \addcontentsline{toc}{section}{Articles}
+% \printbibliography[heading=bibempty,type=article]
+
+%----------------------------------------------------------------------------------------
+%	INDEX
+%----------------------------------------------------------------------------------------
+
+\cleardoublepage
+\phantomsection
+\setlength{\columnsep}{0.75cm}
+\addcontentsline{toc}{chapter}{\textcolor{ocre}{Index}}
+\printindex
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
