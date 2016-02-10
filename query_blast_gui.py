@@ -219,7 +219,6 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
             count = 1
             for name in self.selected_dataset_names:
                 if name != '-- Select --':
-                    frequency = []
                     dataset = self.datasets_cache[name]
                     try:
                         exec("%s = %s" % ("self.table", "self.results_lst_" + str(count)))
@@ -259,35 +258,24 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
                         self.table.setSortingEnabled(True)
                         self.table.sortItems(1, 1)
                         self.graph.plot(self.results[count - 1], self.selected_gene['orf_start'], self.selected_gene['orf_stop'])
-                        self.get_filtered_data(self.datasets_cache[self.selected_dataset_names[0]], dataset,
+                        try:
+                            self.get_filtered_data(self.datasets_cache[self.selected_dataset_names[0]], dataset,
                                                       self.table_filtered, count - 1, self.selected_accession_number_name,
                                                       self.filtered_results)
-                        count += 1
+                        except KeyError:
+                            pass
+
                     except KeyError:
                         self.status_bar.showMessage("Gene Not Found!", 5000)
-                        count = 1
-                        for name in self.selected_dataset_names:
-                            if name != '-- Select --':
-                                try:
-                                    exec("%s = %s" % ("self.table", "self.results_lst_" + str(count)))
-                                    exec("%s = %s" % ("self.table_filtered", "self.results_filtered_lst_" + str(count)))
-                                    exec("%s = %s" % ("self.graph", "self.graph" + str(count)))
-                                except AttributeError:
-                                    pass
-                                self.graph.clear_plot()
-                                self.table.clearContents()
-                                self.table_filtered.clearContents()
-                                self.table.setRowCount(1)
-                                self.table_filtered.setRowCount(1)
-                                for i in range(5):
-                                    self.table.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
-                                    self.table_filtered.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
-                            count += 1
-                        # self.info_dialog.windowTitle("Gene Not Found!")
-                        # self.info_dialog.message("The selected gene  %s is not found in the dataset %s." % (
-                        #     self.selected_accession_number_name, dataset_name))
-                        # self.info_dialog.exec_()
-                        # self.info_dialog.activateWindow()
+                        self.graph.clear_plot()
+                        self.table.clearContents()
+                        self.table_filtered.clearContents()
+                        self.table.setRowCount(1)
+                        self.table_filtered.setRowCount(1)
+                        for i in range(5):
+                            self.table.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
+                            self.table_filtered.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
+                    count += 1
 
     @QtCore.pyqtSlot()
     def on_save_btn_clicked(self):
