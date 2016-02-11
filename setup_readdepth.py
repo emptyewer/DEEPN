@@ -40,9 +40,9 @@ OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon5.icns',
            'plist': {'CFBundleGetInfoString': 'Read Depth',
                      'CFBundleIdentifier': 'edu.uiowa.robertpiper.deepn.read_depth',
-                     'CFBundleShortVersionString': '1.0',
+                     'CFBundleShortVersionString': '1.1',
                      'CFBundleName': 'Read Depth',
-                     'CFBundleVersion': '10',
+                     'CFBundleVersion': '11',
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript',
@@ -68,7 +68,7 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
-        version='1.0',
+        version='1.1',
         description='Read Depth',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'read_depth_gui.py',

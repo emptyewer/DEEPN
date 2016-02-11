@@ -12,9 +12,9 @@ OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon1.icns',
            'plist': {'CFBundleGetInfoString': 'GCJM',
                      'CFBundleIdentifier': 'edu.uiowa.robertpiper.deepn.gcjm',
-                     'CFBundleShortVersionString': '1.0',
+                     'CFBundleShortVersionString': '1.1',
                      'CFBundleName': 'GCJM',
-                     'CFBundleVersion': '10',
+                     'CFBundleVersion': '11',
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
@@ -37,7 +37,7 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
-        version='1.0',
+        version='1.1',
         description='GCJM',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'gc_jm.py',

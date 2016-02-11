@@ -50,9 +50,9 @@ OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon.icns',
            'plist': {'CFBundleGetInfoString': 'DEEPN Sequencing',
                      'CFBundleIdentifier': 'edu.uiowa.robertpiper.deepn',
-                     'CFBundleShortVersionString': '1.0',
+                     'CFBundleShortVersionString': '1.1',
                      'CFBundleName': 'DEEPN',
-                     'CFBundleVersion': '10',
+                     'CFBundleVersion': '11',
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],}
 DATA_FILES = find_data_files(['functions', 'ui', '.'],
@@ -75,7 +75,7 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
-        version='1.0',
+        version='1.1',
         description='DEEPN',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'deepn.py',
