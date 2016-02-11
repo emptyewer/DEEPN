@@ -110,7 +110,7 @@
 
 \noindent \textsc{https://github.com/emptyewer/DEEPN/releases}\\ % URL
 
-\noindent This research was performed .... a grant awarded to .... by National Institute of Health.\\ % License information
+\noindent This research was performed with the support of a grant awarded to Dr. Robert C. Piper by National Institute of Health (5R01GM058202).\\ % License information
 
 \noindent \textit{First release, January 2016} % Printing/edition date
 
@@ -227,7 +227,7 @@ Step-by-step screen-shots and instructions are detailed in the following chapter
 %------------------------------------------------
 
 \section{Installation}\index{Installation}
-\subsection{Download Link}\label{download link}
+\subsection{Download Link}\label{download link}\index{Download Link}
 
     Platform-specific compiled binaries (\emph{Mac OS X, Windows and Linux}) of \textbf{DEEPN} can be downloaded from the below URL. \\
 
@@ -289,7 +289,7 @@ The current DEEPN application requires that \texttt{.sam} files have been genera
 
 \section{Initializing DEEPN}\index{Initializing DEEPN}
 
-\subsection{Launching}
+\subsection{Launching}\index{Launching DEEPN}
 Open the \DEEPN application by double clicking. This opens a window (DEEPN) that can be used to run the other modules.
 \begin{itemize}
 	\item[\textbf{Step 1.}] \textbf{Select Parameters from the list menu in the top. Figure \ref{fig:deepn_main_window}}
@@ -454,10 +454,57 @@ AATTCCACCCAAGCAGTGGTATCAACGCAGAGTGGCCATTACGGCCGGGG
 \end{lstlisting}
 
 
-So Junction Sequences look like this for the mouse cDNA Mate/Plate pGADT7 library:
-\begin{lstlisting}
-AATTCCACCCAAGCAGTGGTATCAACGCAGAGTGGCCATTACGGCCGGGG||tcg-gac-aac-gca
-\end{lstlisting}
+So Junction Sequences look like this for the mouse cDNA Mate/Plate pGADT7 library (Figure \ref{fig:cdna-junction}):
+%\begin{lstlisting}
+%AATTCCACCCAAGCAGTGGTATCAACGCAGAGTGGCCATTACGGCCGGGG||tcg-gac-aac-gca
+%\end{lstlisting}
+
+\begin{figure}[!ht]
+\centering
+\begin{texshade}{cdna.aln}
+	\residuesperline*{40}
+%	\vblockspace{-0.1in}
+	\charstretch{1.5}
+	\linestretch{1.5}
+%	\hidel‘egend
+%	
+	\nameseq{1}{}
+	\nameseq{2}{}
+	\shadingmode{functional}
+	\hideconsensus
+	\hidenumbering
+	\shaderegion{1}{51..66}{Black}{LightYellow}
+%	\shaderegion{1}{72..74}{White}{Red}
+%	\shaderegion{2}{74..76}{White}{Red}
+%	\tintblock{1}{73..74}
+%	
+%	\shaderegion{2}{1..7}{Black}{LightYellow}
+%	\shaderegion{2}{66..72}{Black}{LightYellow}
+%	\shaderegion{2}{10..13}{Black}{LightProcessBlue}
+%	\shaderegion{2}{22..25}{Black}{LightProcessBlue}
+%	\shaderegion{2}{27..31}{Black}{LightLimeGreen}
+%	\shaderegion{2}{39..43}{Black}{LightLimeGreen}
+%	\shaderegion{2}{49..53}{Black}{LightLavender}
+%	\shaderegion{2}{61..65}{Black}{LightLavender}
+%	
+%	\shaderegion{1}{1..7}{Black}{LightYellow}
+%	\shaderegion{1}{64..71}{Black}{LightYellow}
+%	\shaderegion{1}{10..12}{Black}{LightProcessBlue}
+%	\shaderegion{1}{22..24}{Black}{LightProcessBlue}
+%	\shaderegion{1}{26..30}{Black}{LightLimeGreen}
+%	\shaderegion{1}{38..42}{Black}{LightLimeGreen}
+%	\shaderegion{1}{47..51}{Black}{LightLavender}
+%	\shaderegion{1}{59..63}{Black}{LightLavender}
+%	
+	\feature{ttop}{1}{51..66}{---[Red]}{}
+%	\feature{bbottom}{2}{74..76}{---[Red]}{}
+	\feature{ttop}{1}{1..50}{---[RoyalBlue]}{Junction Sequence}
+%	\feature{bbottom}{2}{34..36}{---[RoyalBlue]}{}
+\end{texshade}
+\caption{Junction Sequences look like this for the mouse cDNA Mate/Plate pGADT7 library}
+\label{fig:cdna-junction}
+\end{figure}
+
 
 \vspace{15pt}
 
@@ -466,10 +513,57 @@ For the \textbf{yeast genomic Phil James (pGAD-C1,2,3) library} the junction ``t
 ATACCCCACCAAACCCAAAAAAAGAGATCGAATTCCCCGGGGGATCCATC
 \end{lstlisting}
 
-So junction sequences look like this for the pGAD-C yeast genomic library:
-\begin{lstlisting}
-ATACCCCACCAAACCCAAAAAAAGAGATCGAATTCCCCGGGGGATCCATC||ggc-gaa-aac-gaa
-\end{lstlisting}
+So junction sequences look like this for the pGAD-C yeast genomic library (Figure \ref{fig:gene-junction}):
+%\begin{lstlisting}
+%ATACCCCACCAAACCCAAAAAAAGAGATCGAATTCCCCGGGGGATCCATC||ggc-gaa-aac-gaa
+%\end{lstlisting}
+
+\begin{figure}[!ht]
+\centering
+\begin{texshade}{gene.aln}
+	\residuesperline*{40}
+%	\vblockspace{-0.1in}
+	\charstretch{1.5}
+	\linestretch{1.5}
+%	\hidel‘egend
+%	
+	\nameseq{1}{}
+	\nameseq{2}{}
+	\shadingmode{functional}
+	\hideconsensus
+	\hidenumbering
+	\shaderegion{1}{51..66}{Black}{LightYellow}
+%	\shaderegion{1}{72..74}{White}{Red}
+%	\shaderegion{2}{74..76}{White}{Red}
+%	\tintblock{1}{73..74}
+%	
+%	\shaderegion{2}{1..7}{Black}{LightYellow}
+%	\shaderegion{2}{66..72}{Black}{LightYellow}
+%	\shaderegion{2}{10..13}{Black}{LightProcessBlue}
+%	\shaderegion{2}{22..25}{Black}{LightProcessBlue}
+%	\shaderegion{2}{27..31}{Black}{LightLimeGreen}
+%	\shaderegion{2}{39..43}{Black}{LightLimeGreen}
+%	\shaderegion{2}{49..53}{Black}{LightLavender}
+%	\shaderegion{2}{61..65}{Black}{LightLavender}
+%	
+%	\shaderegion{1}{1..7}{Black}{LightYellow}
+%	\shaderegion{1}{64..71}{Black}{LightYellow}
+%	\shaderegion{1}{10..12}{Black}{LightProcessBlue}
+%	\shaderegion{1}{22..24}{Black}{LightProcessBlue}
+%	\shaderegion{1}{26..30}{Black}{LightLimeGreen}
+%	\shaderegion{1}{38..42}{Black}{LightLimeGreen}
+%	\shaderegion{1}{47..51}{Black}{LightLavender}
+%	\shaderegion{1}{59..63}{Black}{LightLavender}
+%	
+	\feature{ttop}{1}{51..66}{---[Red]}{}
+%	\feature{bbottom}{2}{74..76}{---[Red]}{}
+	\feature{ttop}{1}{1..50}{---[RoyalBlue]}{Junction Sequence}
+%	\feature{bbottom}{2}{34..36}{---[RoyalBlue]}{}
+\end{texshade}
+\caption{Junction sequence for the pGAD-C yeast genomic library.}
+\label{fig:gene-junction}
+\end{figure}
+
 
 If you need to use another \textbf{Junction Sequence} you can do so by pasting it directly into the textbox labeled ``junction sequence''
 
@@ -483,53 +577,99 @@ A new junction sequence should be
 
 \end{remark}
 
-\begin{figure}
+
+\JunctionMake takes the 50~nt sequence and creates 3 sequences ``tag'' from it.  It will then make a new file of all the reads that contain one or more of these sequence tags.  These lists can be found in the folder \texttt{junction\_files}. Consider the following sequence:
+
+\begin{figure}[!ht]
 \centering
-\caption{AAAA}
-\label{tRNAsequences}
-\begin{texshade}{gene.aln}
-	% \residuesperline*{38}
-	% \vblockspace{-0.4in}
+\begin{texshade}{seq1.aln}
+	\residuesperline*{45}
+%	\vblockspace{-0.1in}
 	\charstretch{1.5}
 	\linestretch{1.5}
-	\hidelegend
-	\nameseq{1}{Junction Sequence}
-	\nameseq{2}{Translation}
+	\nameseq{1}{}
+	\nameseq{2}{}
 	\shadingmode{functional}
 	\hideconsensus
 	\hidenumbering
-	\shaderegion{1}{33..35}{White}{RoyalBlue}
-	% \shaderegion{2}{34..36}{White}{RoyalBlue}
-	% \shaderegion{1}{72..74}{White}{Red}
-	% \shaderegion{2}{74..76}{White}{Red}
-	% \tintblock{1}{73..74}
-	
-	% \shaderegion{2}{1..7}{Black}{LightYellow}
-	% \shaderegion{2}{66..72}{Black}{LightYellow}
-	% \shaderegion{2}{10..13}{Black}{LightProcessBlue}
-	% \shaderegion{2}{22..25}{Black}{LightProcessBlue}
-	% \shaderegion{2}{27..31}{Black}{LightLimeGreen}
-	% \shaderegion{2}{39..43}{Black}{LightLimeGreen}
-	% \shaderegion{2}{49..53}{Black}{LightLavender}
-	% \shaderegion{2}{61..65}{Black}{LightLavender}
-	
-	% \shaderegion{1}{1..7}{Black}{LightYellow}
-	% \shaderegion{1}{64..71}{Black}{LightYellow}
-	% \shaderegion{1}{10..12}{Black}{LightProcessBlue}
-	% \shaderegion{1}{22..24}{Black}{LightProcessBlue}
-	% \shaderegion{1}{26..30}{Black}{LightLimeGreen}
-	% \shaderegion{1}{38..42}{Black}{LightLimeGreen}
-	% \shaderegion{1}{47..51}{Black}{LightLavender}
-	% \shaderegion{1}{59..63}{Black}{LightLavender}
-	
-	% \feature{ttop}{1}{72..74}{---[Red]}{}
-	% \feature{bbottom}{2}{74..76}{---[Red]}{}
-	% \feature{ttop}{1}{33..35}{---[RoyalBlue]}{}
-	% \feature{bbottom}{2}{34..36}{---[RoyalBlue]}{}
+	\feature{ttop}{1}{1..23}{---[Red]}{Gal4AD}
+	\feature{ttop}{1}{24..50}{---[RoyalBlue]}{Junction Sequence}
 \end{texshade}
 \end{figure}
 
+\JunctionMake  will first search for the tag \texttt{AGACAACGGCCGGGG}. 
+
+Once found it will determine the  Downstream Reading Frame (the fusion point of the cDNA), which would be: \texttt{AAACCCGGGAAACCCGGGA}.
+
+\vspace{10pt}
+
+Sometimes that there is a cloning mismatch in where a cDNA is inserted into the library. This could be a base substitution or a missing nucleotide. To compensate, \JunctionMake will also look for a 15~bp upstream sequence 4~nt back from what it first looked for. It only does this if the read in question does not have a perfect match to the primary junction sequence query above.
+
+This looks like the following:\begin{figure}[!ht]
+\centering
+\begin{texshade}{seq2.aln}
+	\residuesperline*{45}
+%	\vblockspace{-0.1in}
+	\charstretch{1.5}
+	\linestretch{1.5}
+	\nameseq{1}{}
+	\nameseq{2}{}
+	\shadingmode{functional}
+	\hideconsensus
+	\hidenumbering
+	\feature{ttop}{1}{1..19}{---[Red]}{Gal4AD}
+	\feature{ttop}{1}{20..23}{---[Yellow]}{}
+	\feature{ttop}{1}{24..50}{---[RoyalBlue]}{Junction Sequence}
+\end{texshade}
+\end{figure}
+The sequence to be searched for is: \texttt{TTCCAGACAACGGCC}
+The Downstream Reading Frame returned remains: \texttt{AAACCCGGGAAACCCGGGA}
+
+\vspace{10pt}
+
+We have even found this does not fully capture all the junction sequences there are so \JunctionMake will do the same thing  again, going back another another 4~nt to yield.
+
+\begin{figure}[!ht]
+\centering
+\begin{texshade}{seq3.aln}
+	\residuesperline*{45}
+%	\vblockspace{-0.1in}
+	\charstretch{1.5}
+	\linestretch{1.5}
+	\nameseq{1}{}
+	\nameseq{2}{}
+	\shadingmode{functional}
+	\hideconsensus
+	\hidenumbering
+	\feature{ttop}{1}{1..15}{---[Red]}{Gal4AD}
+	\feature{ttop}{1}{16..23}{---[Yellow]}{}
+	\feature{ttop}{1}{24..50}{---[RoyalBlue]}{Junction Sequence}
+\end{texshade}
+\end{figure}
+
+The sequence to be searched for is: \texttt{AACGTTCCAGACAAC}
+The Downstream Reading Frame returned remains: \texttt{AAACCCGGGAAACCCGGGA}
+
+\vspace{15pt}
+
+\JunctionMake will generate these 3 junction tags that it will look for an apprise you of its status by stating 
+\begin{lstlisting}>>>Comment2The primary, secondary, and tertiary sequences that will be searched for are:1st sequence2nd sequence3rd sequence>>>END 
+\end{lstlisting}
+
+\JunctionMake will then notify you that it has started to search the \texttt{.sam} files using 
+\begin{lstlisting}>>>Comment3Junction Make is searching .sam files for the junctions that span the GAL4-AD and library insertThe next step converts files to a FASTA file format used for blastn searchThe FASTA files are temporary \_TEMP.fa files are located in the blastResults folder\_TEMP.fa files are being converted into blast.txt files that contain the blastn results for each junction.This is done by searching each sequence against the reference cDNA database using blastn.This takes a while...>>>END
+\end{lstlisting}
+
+
+During this time, \JunctionMake runs a \texttt{blastn} search of each of the junction reads against a database of annotated RefSeq mRNAs or yeast genes. Results from this blast search are found in the ``blast\_results'' folder.  Files from this folder are then used to create a searchable format that can be used by the analysis program \BlastQuery. \JunctionMake creates a Python dictionary ``.p'' file for each dataset are stores this in the \texttt{blast\_results\_query} folder.  
+
 \chapter{Running \GeneCount \& \JunctionMake}\index{Running Gene Count \& Junction Make}
+
+The \DEEPN application also provides a \includegraphics[width=160pt]{Pictures/gcjm_btn} button. Clicking this sequentially runs  \GeneCount and \JunctionMake on the contents of ``mapped\_sam\_files'' and the ``unmapped\_sam\_files'' automatically. Thus, one can queue in the files and let processing complete overnight.  To run this option be sure that the ``Work Folder'' contains only:\begin{itemize} 
+    \item \texttt{mapped\_sam\_files} folder with mapped \texttt{.sam} files     \item \texttt{unmapped\_sam\_files} folder with corresponding unmapped \texttt{.sam} files
+\end{itemize}
+If there are no other folders, you can be sure to avoid any \textbf{WARNINGS} that might interrupt the processing workflow.  Alternatively, you can unclick the box on the \DEEPN window to skip such prompts.
+
 
 %----------------------------------------------------------------------------------------
 %	PART
@@ -539,7 +679,78 @@ A new junction sequence should be
 
 \chapter{\BlastQuery}\index{Blast Query}
 
+This program allows you to assess the fusion point between the Gal4AD and each gene/cDNA in question.\begin{itemize}
+    \item[-] This program queries the blast searches done previously in \texttt{blast\_results\_query} folder    \item[-] Once loaded, you simply type in the NCBI reference number (\textbf{NM\_***})    \item[-] The fusion points and their frequency in \texttt{ppm} are displayed
+\end{itemize}
+
+
+Once \JunctionMake has loaded the \texttt{blast\_results\_query} folder with processed ``.p'' files, \BlastQuery can be used to analyze the junctions. Clicking the \includegraphics[width=120pt]{Pictures/blast_query} button launches the module and a new graphic user interface.
+
+
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure2}
+    \caption{Screen shot of Blast Query user interface.}
+    \label{fig:blast_query_screen_shot}
+\end{figure}
+
+
+Enter in GeneID in the text box above in Figure \ref{fig:blast_query_screen_shot}.These are \textbf{NM\_*} identifiers that can be found in relation to gene names in the \texttt{summary.csv} files generated by \GeneCount. An example is \textbf{NM\_146001}.
+
+Then use the pull-down menu to select which datasets to compare. The list of datasets is generated by reading what ``.p'' files are in the \texttt{blast\_results\_query} folder that is within your ``Work Folder''.  If the right .p file is not in that folder, you can simply move it in from somewhere else.
+
+
+The data window can be selected to display \textbf{Results} , \textbf{Filtered Results} or \textbf{Plot} as shown in Figure \ref{fig:blast_query_screen_shot2}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure3}
+    \caption{Screen shot of Blast Query user interface.}
+    \label{fig:blast_query_screen_shot2}
+\end{figure}
+
+
+\section{Results Tab}\index{Blast Query Results}
+
+The ``Results Tab'' shows
+
+\begin{itemize}
+    \item \textbf{Position} (which is the position of first nucleotide of the given insert that found for a particular junction read). 
+    \item \textbf{\#Junctions} is a count, in PPM, for how abundant that particularjunction is
+    \item \textbf{QueryStart} comes from the q.start value of the \texttt{blastn} search used to identify the downstream gene fused to the Gal4AD.  It refers to how many nucleotides are between the junction tag and the matched cDNA position. Often, this number is 1, but sometimes there are cloning artifacts that generate extra sequence between the end of the Gal4-AD and where the match is to the cDNA.  These extra nucleotides will have an impact on the translation reading frame.  So the Position and the Query Start are used to calculate whether a particular junction is within the Coding Region (CDS) and whether it is in-frame.
+    \item \textbf{CDS} shows whether the junction site in the mRNA of interest is upstream of the coding region, downstream of the coding region, or within (In ORF) of the coding region.
+    \item \textbf{Frame} calculates whether the downstream library insert that encodes the candidate protein of interest is in the same frame as the upstream Gal4AD.
+\end{itemize}
+
+\section{Filtered Results Tab}\index{Blast Query Filtered Results}
+
+Sometimes, sequencing the same junction multiple times leads to sequence errors which can produce reads that have the same Position but different Q.Starts, or that have Positions that are 1-2 bp different from the main Position.  To simplify comparisons, one can use the ``Filtered Results'' tab, which collapses all similar Positions that may have different Q.starts into a single value. Filtered Results also displays only the Positions that are found within the \textbf{Left} most dataset. Thus, by placing, say, a total unselected library dataset on the left, the \textbf{Right}-hand datasets will only display position sites that are in common with the unselected library dataset.
+
+
+\section{Plot Tab}\index{Blast Query Plot Tab}
+
+The plot tab creates a quick graphic displaying where each junction site is along the given mRNA or gene.  The abundance of each junction sequence within the dataset are plotted on the Y axis in ppm. If a junction site is downstream of the CDS or out of translational frame, the bar is grey.  If it is within the CDS and in-frame it is dark blue, and if it is upstream of the CDS start but within the correct translational reading frame, it is cyan.  The start and stop sites for translation are shown with red bars. The mRNA/gene sequence itself is given in the text box below, where the protein coding sequence is shown in black text and the upstream and downstream untranslated regions are in grey.
+
+\section{Export for Graphing}\index{Export for Graphing}
+
+A \includegraphics[width=80pt]{Pictures/save_csv_btn} button is found at the top right hand corner.This will save the current \textbf{Results} and \textbf{Filtered Results} Tables in a \texttt{.csv} file that can be opened in \texttt{Microsoft Excel}. Results from each selected dataset are saved in a different sheet.
+
+This output pasted program for further analysis or graphing such as GraphPad Prism
+
+\vspace{10pt}
+\href{http://www.graphpad.com/scientific-software/prism/}{http://www.graphpad.com/scientific-software/prism/}
+
 \chapter{\ReadDepth}\index{Read Depth}
+
+\ReadDepth is used as an aid to determine the 3’ end of the interacting cDNA insert.  Most genes that enrich upon selection are represented by a single plasmid, which can be surmised by having a dominant junction site.  Thus, much of a given cDNA insert extends downstream can be determined by read-depth along the cDNA sequence. \ReadDepth determines this by measuring how many sequences within the dataset contain a 25 bp interval of the cDNA sequence in question. \ReadDepth first makes a subset of all the mapped reads that correspond to the gene of interest and then counts how many of these reads contain sequence that match along the length of the cDNA. The up/down arrows can be used to adjust the interval distance in increments of 50 nt.  Users can also directly enter a desired interval, with a minimum interval of 50~nt.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure4}
+    \caption{Screen shot of Read Depth user interface.}
+    \label{fig:blast_query_screen_shot2}
+\end{figure}
 
 % %----------------------------------------------------------------------------------------
 % %	BIBLIOGRAPHY

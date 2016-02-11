@@ -10,13 +10,13 @@ import libraries.joblib.parallel as Parallel
 import functions.fileio_gui as f
 import functions.printio_gui as p
 import functions.spinbar as spinbar
-import ctypes
 
 input_folder = 'mapped_sam_files'
 # Creates the folder that will hold the Genecounts summaries
 summary_folder = "gene_count_summary"
 # Creates the folder that will hold more granualar data on exon counts per chromosome
 chromosomes_folder = "chromosome_files"
+gene_count_bin_folder = "gene_count_indices"
 
 main_directory = sys.argv[1]
 gene_dictionary = sys.argv[2]
@@ -45,14 +45,8 @@ def make_read_dictionary(SAMfile, chromosomes_list, bin_folder):
     binoutfile_names = {}
 
     try:
-        if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == 'darwin':
-            if not os.path.exists(bin_folder):
-                os.mkdir(bin_folder)
-        else:
-            if not os.path.exists(bin_folder):
-                os.mkdir(bin_folder)
-                FILE_ATTRIBUTE_HIDDEN = 0x02
-                ctypes.windll.kernel32.SetFileAttributesW(bin_folder, FILE_ATTRIBUTE_HIDDEN)
+        if not os.path.exists(bin_folder):
+            os.mkdir(bin_folder)
     except IOError:
         pass
 
@@ -77,8 +71,8 @@ def make_read_dictionary(SAMfile, chromosomes_list, bin_folder):
                     binoutfile_names[split[2]] = handle#
                 binoutfile_names[split[2]].write('%s:%s\n' % (split[3], split[9]))#
 
-    for f in binoutfile_names.keys():#
-        binoutfile_names[f].close()#
+    for f in binoutfile_names.keys():
+        binoutfile_names[f].close()
 
     SAMin.close()
     return (readDict, totalReads)
@@ -135,12 +129,12 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     sys.stdout.flush()
     exonDict = get_dictionary(os.path.join('dictionaries', gene_dictionary))
     infile = os.path.join(directory, input_folder, filename)
-    bin_folder = ''
-    if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == 'darwin':
-        bin_folder = os.path.join(directory, input_folder, '.' + filename[:-4])
-    else:
-        bin_folder = os.path.join(directory, input_folder, filename[:-4])
-    (readDict, totalReads) = make_read_dictionary(infile, chromosomes_list, bin_folder)
+    # bin_folder = ''
+    # if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == 'darwin':
+    #     bin_folder = os.path.join(directory, input_folder, '.' + filename[:-4])
+    # else:
+    #     bin_folder = os.path.join(directory, input_folder, filename[:-4])
+    (readDict, totalReads) = make_read_dictionary(infile, chromosomes_list, gene_count_bin_folder)
     sys.stdout.write(">>> %d Total Reads (%s)" % (totalReads, filename))
     sys.stdout.flush()
     totalReads2 = 0
