@@ -40,12 +40,12 @@ class GetReadList_Thread(QtCore.QThread):
         self.parent = parent
 
     def run(self):
-        dir = 'gene_count_indices'
         # if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == 'darwin':
         #     dir = '.' + self.dataset_name[:-4]
         # else:
         #     dir = self.dataset_name[:-4]
-        filehandle = open(os.path.join(self.directory, dir, self.selected_gene['chromosome'] + '.bin'), 'rb')
+        filehandle = open(os.path.join(self.directory, 'gene_count_indices', self.dataset_name[:-4],
+                                       self.selected_gene['chromosome'] + '.bin'), 'rb')
         self.parent.list_of_reads = []
         count = 0
         for line in filehandle.readlines():

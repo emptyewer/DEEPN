@@ -129,7 +129,7 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     sys.stdout.flush()
     exonDict = get_dictionary(os.path.join('dictionaries', gene_dictionary))
     infile = os.path.join(directory, input_folder, filename)
-    gene_count_bin_folder = os.path.join(directory, "gene_count_indices")
+    gene_count_bin_folder = os.path.join(directory, "gene_count_indices", filename[:-4])
     # bin_folder = ''
     # if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == 'darwin':
     #     bin_folder = os.path.join(directory, input_folder, '.' + filename[:-4])
@@ -178,6 +178,7 @@ def initialize_folders(directory):
     fileio.create_new_folder(directory, summary_folder)
     # Creates the folder that will hold more granualar data on exon counts per chromosome
     fileio.create_new_folder(directory, chromosomes_folder)
+    fileio.create_new_folder(directory, "gene_count_indices")
 
 if __name__ == '__main__':
     # Instantiate Function Objects for Basic Input Output
