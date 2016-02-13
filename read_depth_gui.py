@@ -45,8 +45,7 @@ class GetReadList_Thread(QtCore.QThread):
         #     dir = '.' + self.dataset_name[:-4]
         # else:
         #     dir = self.dataset_name[:-4]
-        filehandle = open(os.path.join(self.directory, self.input_folder, dir,
-                                       self.selected_gene['chromosome'] + '.bin'), 'rb')
+        filehandle = open(os.path.join(self.directory, dir, self.selected_gene['chromosome'] + '.bin'), 'rb')
         self.parent.list_of_reads = []
         count = 0
         for line in filehandle.readlines():
@@ -186,7 +185,7 @@ class Read_Depth_Gui(QtGui.QMainWindow, form_class):
             self.plot.plot(self.results, self.selected_gene['orf_start'], self.selected_gene['orf_stop'])
 
 
-    def get_accession_number_list(self, directory, gene_list_file):
+    def get_accession_number_list(self, gene_list_file):
         fh = open(os.path.join('lists', gene_list_file), 'r')
         gene_list = OrderedDict()
         accession_list = QtCore.QStringList()
@@ -200,8 +199,7 @@ class Read_Depth_Gui(QtGui.QMainWindow, form_class):
 
     def _initialize_ui_elements(self):
         self.plot_layout.addWidget(self.plot)
-        self.gene_list, self.accession_numbers_list = self.get_accession_number_list(self.directory,
-                                                                                     self.gene_list_file)
+        self.gene_list, self.accession_numbers_list = self.get_accession_number_list(self.gene_list_file)
         self.populate_accession_suggestions()
         for fi in self.fileio.get_file_list(self.directory, self.input_folder, '.sam'):
             self.sam_files_ddl_1.addItem(fi)
@@ -245,13 +243,13 @@ class Read_Depth_Gui(QtGui.QMainWindow, form_class):
 
     @QtCore.pyqtSlot()
     def on_save_btn_clicked(self):
-        self.save_query_results(self.results, self.selected_accession_number_name, self.directory)
+        self.save_query_results(self.selected_accession_number_name, self.directory)
         self.status_bar.showMessage("Saved to file %s" % os.path.join('depth_results', '%s_%s.xlsx' %
                                     (self.selected_accession_number_name, strftime("%Y-%m-%d_%Hh%Mm%Ss",
                                                                                    localtime()))),
                                     5000)
 
-    def save_query_results(self, results, file_name, directory, path='depth_results'):
+    def save_query_results(self, file_name, directory, path='depth_results'):
         self.fileio.create_new_folder(directory, path)
         workbook = xls.Workbook(os.path.join(directory, path, '%s_%s.xlsx' %
                                              (file_name, strftime("%Y-%m-%d_%Hh%Mm%Ss", localtime()))))

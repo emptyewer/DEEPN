@@ -129,7 +129,7 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     sys.stdout.flush()
     exonDict = get_dictionary(os.path.join('dictionaries', gene_dictionary))
     infile = os.path.join(directory, input_folder, filename)
-    gene_count_bin_folder = os.path.join(directory, input_folder, "gene_count_indices")
+    gene_count_bin_folder = os.path.join(directory, "gene_count_indices")
     # bin_folder = ''
     # if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == 'darwin':
     #     bin_folder = os.path.join(directory, input_folder, '.' + filename[:-4])
