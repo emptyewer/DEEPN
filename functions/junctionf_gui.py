@@ -255,10 +255,13 @@ class junctionf():
                 variable = float(split[11])*0.98
                 counter += 1
 
-                split = line.split()
-                junctIndex = split[8]+'-'+split[6]
+                # split = line.split()
+                pointing_downstream = 1
+                if (split[9] - split[8]) < 0:
+                    pointing_downstream = 0
+                junctIndex = split[8] + '-' + split[6]
                 if split[1] not in Dict.keys():
-                    Dict[split[1]] = [junctIndex]
+                    Dict[split[1]] = [junctIndex, pointing_downstream]
                 else:
                     Dict[split[1]].append(junctIndex)
             else:
