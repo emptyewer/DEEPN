@@ -258,10 +258,12 @@ class junctionf():
                 # split = line.split()
                 pointing_downstream = 1
                 if (split[9] - split[8]) < 0:
-                    pointing_downstream = 0
-                junctIndex = split[8] + '-' + split[6]
+                    junctIndex = split[8] + '-1000'
+                else:
+                    junctIndex = split[8] + '-' + split[6]
+
                 if split[1] not in Dict.keys():
-                    Dict[split[1]] = [junctIndex, pointing_downstream]
+                    Dict[split[1]] = [junctIndex]
                 else:
                     Dict[split[1]].append(junctIndex)
             else:

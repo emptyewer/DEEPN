@@ -248,7 +248,7 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
                                 orf = 'Downstream'
                             if int(values[0]) >= int(self.selected_gene['orf_start']) and int(values[0]) <= int(self.selected_gene['orf_stop']):
                                 orf = "In ORF"
-                            if values[2][1] == 0:
+                            if int(values[1].rsplit('-', 1)[1]) == 1000:
                                 frame = "Backwards"
 
                             self.table.setItem(row, 0, QCustomTableWidgetItemInt(values[0]))

@@ -132,7 +132,7 @@
 %	PART
 %----------------------------------------------------------------------------------------
 
-\part{DEEPN Overview}
+\part{Experimental Protocols}
 
 %----------------------------------------------------------------------------------------
 %	CHAPTER 1
@@ -140,7 +140,92 @@
 
 \chapterimage{chapter_head_1.pdf} % Chapter heading image
 
-\chapter{DEEPN Overview}
+\chapter{DEEPN-Y2H protocol}
+
+\section{Cloning}\index{Cloning}
+
+\subsection{Construction of Gal4-DNA-binding domain Plasmids}\index{Construction of Gal4-DNA-binding domain Plasmids}
+
+Any TRP1-containing plasmid accommodating expression fusions to a myc epitope-tagged Gal4 DNA binding domain are suitable for the workflow described here.  The current study uses pGBKT7 (clonetech), a plasmid carrying the Kanamycin-resistance gene for selection in bacteria, the TRP1 gene for selection in trp1 mutant yeast such as Y187 and PJ69-4A, and the Gal4 DNA binding domain encoded by bp 1-147 of \emph{S. cerevisiae} GAL4.  DNA fragments encoding proteins of interest to be cloned downstream of the Gal4 DNA binding domain region can be made by gene synthesis using the codon bias of \emph{S. cerevisiae} as an aid to ensure high level production and as an aid for cloning (\cite{ang2016multi}).  Synthetic gene fragments (gBlocks, Integrated DNA Technologies, Coralville, IA; or Strings, Thermofisher, Waltham, MA) were PCR amplified and cloned into pGBKT7 cut with EcoRI and BamHI using the method of Gibson et al and the Gibson Assembly Master Mix kit available from New England Biolabs.  Resulting Kanamycin-resistant bacterial colonies were screened for the insert of interest using colony PCR and primers for the insert of interest.
+
+\subsection{Expression of Gal4-DNA-binding domain fusion proteins}
+
+The TRP1-carrying bait plasmids are then transformed into PJ69-4A, a MATA strain suitable for selection of Yeast 2-hybrid interactions.  The resulting strain can be mated to the Y187 strain that contains the yeast 2-hybrid library.  Other MATA strains, such as the Y2HGold yeast strain (Clontech, Mountain View, CA) can be used to hold the TRP1-containing bait plasmid, however, PJ69-4A showed a 20 fold better mating efficiency than other Y2H strains including the Y2HGold strain. So this protocol will not work with Y2HGold or other yeast that do not have efficient mating. Yeast transformation was performed as previously described using a Lithium Sorbitol buffer (Kawai et al., 2010).
+
+
+To check for expression of the Gal4-DBD-fusion protein, transformed PJ69-4A cells are grown in 1 mls of Synthetic Defined media lacking Tryptophan (SD-Trp) overnight.  Dilute with 2 volumes of YPD and grow for 1 hr at 30°C.  Pellet cells and resuspend in 1 ml 0.2N NaOH.  After 5 min incubation at 25°C, re-pellet cells, remove the NaOH, and resuspend the pellet in 100µls TWIRL/0.8M BME sample buffer (von der Haar, 2007).  Incubate lysate at 70°C for 5 min and analyze by SDS-PAGE and immunoblotting as using anti-myc antibodies.  
+
+\section{Self-Activation Test}
+
+\subsection{Test selection conditions for yeast 2-hybrid interaction}
+
+The Gal4-DBD-fusion proteins need to be tested for conditions that will select for possible yeast-2hybrid interactions. This needs to be in the context of the same diploid background that will house the bait and library prey plasmids after mating. 
+
+\begin{itemize}
+    \item Transform the Y187 strain with the empty vector-only “prey” plasmid.  This workflow uses a plasmid (pGADT7) that expresses the Gal4-transcriptional activation domain and carries the ampicillin-resistance for bacterial growth and the LEU2 gene for selection in yeast.
+    \item Mate the Leu+ Y187 transformant with the Trp+ PJ69-4A transformant carrying the bait plasmid of interest by patching them together on a YPD plate. Allow the plate to grow overnight at 30$^\circ$C, before streaking yeast from the patch onto SD-Leu-Trp plate to select and isolate single colonies of PJ69-4A/Y187 MatA/$\alpha$ diploids. 
+    \item Create a set of tester plates: SD-Leu-Trp, SD-Trp-Leu-His, SD-Leu-Trp-His with the addition of 0.1-10~mM 3AT (3-amino-triazole).  Grow diploids overnight in SD-Leu-Trp, pellet and resuspend cells twice in sterile water and resuspend to OD 0.5. Serially dilute cells 1:10 in tubes or 96 well dish and spot 4 $\mu$l of each dilution onto each type of plate. Grow for 2-3 days at 30$^\circ$C.
+\end{itemize}
+
+
+\begin{remark}
+    The best result is to see growth in the presence but not absence of Histidine regardless of whether there is 3AT.  This will allow the use of SD-Trp-Leu-His to select for yeast with a positive yeast-2hybrid interaction.  If there is growth on SD-Leu-Trp-His plates, then a Y2H selection can still be obtained using the lowest concentration of 3AT that prevents growth.  Typically, the level of 3AT to establish a threshold of selection is between 0.1 and 1 mM.  This can be observed in Figure 1. Using higher levels of 3AT or other selections that are more stringent will undermine the ability to detect Y2H interactors.  If growth is observed on SD-Leu-Trp-His > 1mM 3AT a different bait plasmid should be sought.
+\end{remark}
+
+\subsection{Mating and Selection}
+
+The Y187 strain does not mate well.  Thus, the following optimized conditions are required to maintain complexity of the library.  The overall scheme is pictured in Figure 2.
+\vspace{0.1in}
+\begin{enumerate}[leftmargin=0.8in]
+    \item[\textbf{Day 1}] Innoculate a fresh culture of the PJ69-4A strain transformed with the TRP1-containing bait plasmid in 23 mls of SD-Trp media. Thaw a vial of the Y187 cells containing the LEU2-carrying “prey” library plasmid and inoculate a 125mls of SD-LEU media. Grow all cultures overnight at 30$^\circ$C, 200rpm.
+    \item[\textbf{Day 2}] The O.D. of the overnight cultures should range between 1.0 to 1.5.  Pellet 21 OD equivalents of the PJ69-4A transformant cells and 15 OD equivalents of the Y187 strain carrying the library plasmids in separate 50mL conical tubes. Resuspend cells in 10ml of water and re-pellet in new 50 ml conical tube.  Resuspend PJ69-4A cells and Y187 cells in 4 ml bYPDA pH 3.7, each. To set-up 4 equivalent mating reactions, add 1mL PJ69-4A cells, 1ml Y187 cells, and 1 ml bYPDA pH 3.7 to new 50 ml conical tube. Incubate at 30$^\circ$C with gentle orbital agitation (80-100rpm) for 90 min so that the cells do not fully sediment.  Pellet cells, and resuspend in 2mls of bYPDA (See Appendix A). Plate all 2 mLs onto a 150 mm YPD plate.  
+    \item[\textbf{Day 3}] Harvest cells from the YPD plates using 12 mls of SD-Leu-Trp media and place into a 50mL conical tube.  Pellet cells and resuspend the cells in 40 mLs SD-Leu-Trp media. To calculate the the number of diploid cells, dilute 4µls of the diploid mixture into 200 $\mu$ls SD-Trp-Leu media and plate onto an SD-Leu-Trp plate.  This plate represents a 1:10,000 fold dilution of the stock of diploids harvested and should yield 100-1000 colonies after plate is incubated at 30$^\circ$C for 2 days. 
+    
+    Take the remainder of each 40ml cell resuspension and inoculate a flask containing 500mls of SD-Leu-Trp media. Shake incubate these flasks at 30°C, 2200rpm until they reach saturation (~2.0 OD/ml).  This typically takes about 36 hours.  
+\end{enumerate}
+
+\begin{remark}
+    To harvest cells efficienctly from YPD agar plates, scrap the cells off the YPD plates using a cell scrapper and -Leu-Trp media into a 50mL conical tube.  This will take about 4 or 5 times of rinsing the YPD plate with 2 -3mls of -Leu-Trp media at a time. 
+\end{remark}
+
+\begin{enumerate}[leftmargin=0.8in]
+    \item[\textbf{Day 4}] Monitor the growth of all flasks by checking the Optical Density.
+    \item[\textbf{Day 5}] At this point, the titer plates should be ready to analyze, allowing verification of sufficient mating efficiency to maintain library complexity.  A minimum of 1 million total diploids is recommended for this workflow. Take 20 mls from the saturated 500 ml culture and use to inoculate flasks containing 750 mls SD-Leu-Trp media and another 20 mls to inoculate a flask containing 750 mls SD-Leu-Trp-His with the lowest level of 3AT that eliminates background growth in –His media. Mix the new cultures (770 mls) well and take an initial OD600.  Shake incubate cultures at 30$^\circ$C, 200rpm until reaching saturation, which typically occurs in ~24 hrs for the unselected SD-Leu-Trp culture and can take up to 40+ hrs for cultures under stringent selection for Y2H interactions.   \end{enumerate}
+
+
+\begin{remark}
+    Make sure that you mix the 500mL flask well before taking 20mls out for inoculation because yeast can sediment quickly and cell suspension needs to be homogeneous. 
+\end{remark}
+
+
+\begin{enumerate}[leftmargin=0.8in]
+    \item[\textbf{Day 6}] Once unselected SD-Leu-Trp cultures have reached saturation (OD 2.0), remove 10 mls, pellet cells, and freeze at -20$^\circ$C or continue onto DNA extraction.  For the unselected SD-Leu-Trp culture, this will serve as the sample for sequencing.  
+    \item[\textbf{Day 7}] Once selected SD-Leu-Trp-His culture that is selecting for Y2H interactions has reached saturation, remove 2 mls of the culture and inoculate into 75 mls of fresh SD-Leu-Trp-His containing appropriate levels of 3AT. Allow this culture to grow at 30$^\circ$C with shaking, 200rpm, until it reaches saturation, which can be followed throughout the course of growth by taking OD measurements. Saturation is typically attained between 30-60 hrs.  
+    \item[\textbf{Day 8-9}] Once the Selected SD-Leu-Trp-His cultures have reached saturation (OD 2.0), remove 10 mls, pellet cells, and at this point cells can be frozen at -20$^\circ$C or continue onto the next step of DNA extraction.    \end{enumerate}
+
+
+\subsection{Sample preparation for DEEPN Illumina Sequencing}
+
+\begin{enumerate}[leftmargin=1.4in]
+    \item[\textbf{DNA Extraction}] Resuspend pellets of cells in 500ul of 50mMTris 20mMEDTA and transfer to a 1.5mL eppendorf tube. Add 3 $\mu$l of BME and 10 $\mu$l of Zymolase stock.  Mix well and incubate in the 37°C incubator for 24-36hours.  Extract with Phenol/Chloroform/Isoamyl alcohol and ethanol precipitate.  Resuspend pellet in 100 $\mu$l of 50mMTris/20mMEDTA add 1 $\mu$l of RNaseA stock and incubate at 37$^\circ$C for 1hr. Ethanol precipitate and resuspend in 100 $\mu$l 5mMTris/2mMEDTA.  Quantify DNA by absorbance at 280 nm.  
+    \item[\textbf{2 PCR cDNA inserts}] Perform 2, 50µl PCR reactions per DNA sample.  Each reaction contains 50 pmoles F1-primer and R1-primer (Figure 3), 25µls NEBNext High-Fidelity 2x PCR Master Mix, 5 ug of DNA sample, and water up to 50ul. The reactions are amplified for 25 cycles with extension times of 3 min. Analyze PCR products by agarose gel electrophoresis.  Samples should show smear of DNA around 1-3 kb, where the banding pattern may be found for samples where a yeast two-hybrid interaction was selected for (Figure 3).  Combine duplicate PCR samples and purify using the QIAquick PCR purification kit.  
+    \item[\textbf{Illumina sequencing}] 550ng of PCR product was sheared using a Covaris E220 to give fragments of an average length of 300bp. Indexed Sequencing libraries were generated using the KAPA Hyper Prep kit Cat No: KK8500 (KAPA Biosystems, Wilmington, MA) for Illumina sequencing that adds linkers encoding barcodes, priming sites and capture sequences asymmetrically on the ends of the DNA fragments. Indexed libraries were then pooled and sequenced using the Illumina 2x100 nt SBS v3 chemistry run on an Illumina HiSeq2500 (Illumina, Inc., San Diego, CA). The number of reads targeted was between 10 and 30 million, with more reads desired for the unselected populations that are typically more complex.
+\end{enumerate}
+
+
+%----------------------------------------------------------------------------------------
+%	PART
+%----------------------------------------------------------------------------------------
+
+\part{Software}
+
+%----------------------------------------------------------------------------------------
+%	CHAPTER 1
+%----------------------------------------------------------------------------------------
+
+\chapterimage{chapter_head_1.pdf} % Chapter heading image
+
+\chapter{DEEPN Software Overview}
 
 \section{About DEEPN}\index{About DEEPN}
 The \DEEPN bioinformatics workflow is a collection of 4 programs
@@ -756,14 +841,14 @@ This output pasted program for further analysis or graphing such as GraphPad Pri
 % %	BIBLIOGRAPHY
 % %----------------------------------------------------------------------------------------
 
-% \chapter*{Bibliography}
-% \addcontentsline{toc}{chapter}{\textcolor{ocre}{Bibliography}}
-% \section*{Books}
-% \addcontentsline{toc}{section}{Books}
-% \printbibliography[heading=bibempty,type=book]
-% \section*{Articles}
-% \addcontentsline{toc}{section}{Articles}
-% \printbibliography[heading=bibempty,type=article]
+ \chapter*{Bibliography}
+ \addcontentsline{toc}{chapter}{\textcolor{ocre}{Bibliography}}
+ \section*{Books}
+ \addcontentsline{toc}{section}{Books}
+ \printbibliography[heading=bibempty,type=book]
+ \section*{Articles}
+ \addcontentsline{toc}{section}{Articles}
+ \printbibliography[heading=bibempty,type=article]
 
 %----------------------------------------------------------------------------------------
 %	INDEX
