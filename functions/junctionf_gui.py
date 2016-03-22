@@ -238,7 +238,7 @@ class junctionf():
         variable = 0
         Dict = {}
         toggle = 'n'
-        for line in I:
+        for line in I.readlines():
             line.strip()
             split = line.split()
             if "BLASTN" in line:
@@ -255,9 +255,7 @@ class junctionf():
                 variable = float(split[11])*0.98
                 counter += 1
 
-                # split = line.split()
-                pointing_downstream = 1
-                if (split[9] - split[8]) < 0:
+                if (int(split[9]) - int(split[8])) < 0:
                     junctIndex = split[8] + '-1000'
                 else:
                     junctIndex = split[8] + '-' + split[6]

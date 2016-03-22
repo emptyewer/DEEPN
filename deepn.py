@@ -336,8 +336,12 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
                     self.process.start('Junction Make.app/Contents/MacOS/Junction Make',
                                 [self.directory, str(self.junction_sequence_txt.text()),
                                 str(self.exclude_sequence_txt.text()), self.blast_db_name])
-                # self.process.start('python', ['junction_make_gui.py', self.directory, str(self.junction_sequence_txt.text()),
-                #                               str(self.exclude_sequence_txt.text()), self.blast_db_name])
+                    # print 'python ', 'junction_make_gui.py ', self.directory, str(self.junction_sequence_txt.text()),\
+                    #     str(self.exclude_sequence_txt.text()), self.blast_db_name
+                    # self.process.start('python', ['junction_make_gui.py', self.directory, str(self.junction_sequence_txt.text()),
+                    #                           str(self.exclude_sequence_txt.text()), self.blast_db_name])
+
+
             else:
                 self.process_finished()
         elif self.clicked_button == self.sender():
