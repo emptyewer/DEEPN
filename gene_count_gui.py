@@ -140,21 +140,22 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     sys.stdout.flush()
     totalReads2 = 0
     for chrom in chromosomes_list:
-        readList = sorted(readDict[chrom])
-        exonList = sorted(exonDict[chrom].keys())
-        for read in readList:
-            if len(exonList) > 0 and read < exonList[0][0]:
-                continue
-            for exon in exonList:
-                if read >= exon[0] and read <= exon[1]:
-                    exonDict[chrom][exon] += 1
-                    totalReads2 += 1
-                elif read > exon[1]:
-                    exonList.remove(exon)
-        sys.stdout.write('>>> Finished Chromosome %s%s for File (%s)' % (chrom[:20], '' if len(chrom) <= 20 else '...',
-                                                                         filename))
-        sys.stdout.flush()
-        time.sleep(1)
+        if chrom in exonDict.keys():
+            readList = sorted(readDict[chrom])
+            exonList = sorted(exonDict[chrom].keys())
+            for read in readList:
+                if len(exonList) > 0 and read < exonList[0][0]:
+                    continue
+                for exon in exonList:
+                    if read >= exon[0] and read <= exon[1]:
+                        exonDict[chrom][exon] += 1
+                        totalReads2 += 1
+                    elif read > exon[1]:
+                        exonList.remove(exon)
+            sys.stdout.write('>>> Finished Chromosome %s%s for File (%s)' % (chrom[:20], '' if len(chrom) <= 20 else '...',
+                                                                             filename))
+            sys.stdout.flush()
+            time.sleep(1)
     sys.stdout.write('>>> Creating files and cleaning up... ( %s )' % filename)
     sys.stdout.flush()
     allToFile(directory, exonDict, totalReads, totalReads2, filename, summary_folder, chromosomes_folder)
