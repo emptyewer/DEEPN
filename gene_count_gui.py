@@ -37,7 +37,7 @@ def get_dictionary(fileName):
     return dictionary
 
 
-def make_read_dictionary(SAMfile, chromosomes_list, bin_folder):
+def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
     totalReads = 0
     iterations = 0
     SAMin = open(SAMfile, 'r')
@@ -61,7 +61,7 @@ def make_read_dictionary(SAMfile, chromosomes_list, bin_folder):
                 chromosome = split[2][3:]
                 RUmapped = split[2]
                 position = int(split[3])
-                if RUmapped != '*':
+                if RUmapped != '*' and chromosome in exonDict.keys():
                     totalReads += 1
                     iterations += 1
                     readDict[chromosome].append(position)
@@ -135,7 +135,7 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     #     bin_folder = os.path.join(directory, input_folder, '.' + filename[:-4])
     # else:
     #     bin_folder = os.path.join(directory, input_folder, filename[:-4])
-    (readDict, totalReads) = make_read_dictionary(infile, chromosomes_list, gene_count_bin_folder)
+    (readDict, totalReads) = make_read_dictionary(infile, chromosomes_list, gene_count_bin_folder, exonDict)
     sys.stdout.write(">>> %d Total Reads (%s)" % (totalReads, filename))
     sys.stdout.flush()
     totalReads2 = 0
