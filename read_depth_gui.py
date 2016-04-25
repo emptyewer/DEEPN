@@ -259,10 +259,14 @@ class Read_Depth_Gui(QtGui.QMainWindow, form_class):
                 worksheet.write(row, col, item)
         workbook.close()
 
+
+def appExit():
+    app.quit()
+    sys.exit()
+
 if __name__ == '__main__':
     input_folder = 'mapped_sam_files'
     form = Read_Depth_Gui(input_folder, main_directory, gene_list_file)
     form.show()
+    app.aboutToQuit.connect(appExit)
     app.exec_()
-    app.deleteLater()
-    sys.exit()

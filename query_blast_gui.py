@@ -304,10 +304,14 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
                     worksheet.write(row, col+10, item)
         workbook.close()
 
+
+def appExit():
+    app.quit()
+    sys.exit()
+
 if __name__ == '__main__':
     input_folder = 'blast_results_query'
     form = Query_Blast_Gui(input_folder, main_directory, gene_list_file)
     form.show()
+    app.aboutToQuit.connect(appExit)
     app.exec_()
-    app.deleteLater()
-    sys.exit()
