@@ -47,7 +47,7 @@ OPTIONS = {'argv_emulation': True,
            'includes': INCLUDES,
            'excludes': EXCLUDES,
            }
-DATA_FILES = find_data_files(['ui', 'ui', 'statistics'], ['ui', 'lib/python2.7', ''], ['*.ui', '*.py', '*.r', ])
+DATA_FILES = find_data_files(['ui', '', 'statistics'], ['ui', 'lib/python2.7', ''], ['*.ui', 'DragDropListView.py', '*.r', ])
 if sys.platform == 'darwin':
     setup(
         app=APP,
