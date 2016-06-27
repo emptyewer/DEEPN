@@ -1,11 +1,13 @@
 import os
 import sys
 import glob
+import fnmatch
 from setuptools import setup
 if sys.platform == 'darwin':
     import py2app
 elif sys.platform == 'win32':
     import py2exe
+sys.setrecursionlimit(2000)
 
 def find_data_files(sources, targets, patterns):
     """Locates the specified data-files and returns the matches
@@ -33,9 +35,12 @@ def find_data_files(sources, targets, patterns):
     return sorted(ret.items())
 
 
+
 APP = ['stat_maker_gui.py']
-INCLUDES = ['PyQt4', 'time', 'sys', 'os', 'thread', 'subprocess', 're', 'sip']
-EXCLUDES = ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon']
+INCLUDES = ['sip', 'PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc', 'distutils.spawn'
+            'json', 'numbers', 'hashlib', 'decimal', 'thread', 'itertools', 'pyqtgraph']
+EXCLUDES = ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest',
+            'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon']
 OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon6.icns',
            'plist': {'CFBundleGetInfoString': 'Stat Maker',
@@ -47,7 +52,10 @@ OPTIONS = {'argv_emulation': True,
            'includes': INCLUDES,
            'excludes': EXCLUDES,
            }
-DATA_FILES = find_data_files(['ui', '', 'statistics'], ['ui', 'lib/python2.7', ''], ['*.ui', 'DragDropListView.py', '*.r', ])
+DATA_FILES = find_data_files(['ui', '', 'statistics', 'libraries'],
+                             ['ui', 'lib/python2.7', 'statistics', 'libraries'],
+                             ['Stat_Maker.ui', 'DragDropListView.py', '*.pkg', 'pyper.py'])
+
 if sys.platform == 'darwin':
     setup(
         app=APP,
@@ -57,6 +65,7 @@ if sys.platform == 'darwin':
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         data_files=DATA_FILES
     )
+    os.system('cp -r statistics/R dist/Stat\ Maker.app/Contents/Resources/statistics/')
 elif sys.platform == 'win32':
     origIsSystemDLL = py2exe.build_exe.isSystemDLL
     def isSystemDLL(pathname):

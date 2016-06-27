@@ -1,13 +1,16 @@
-import os
 import sys
+import os
 import re
 import thread
 import time
-from PyQt4 import QtCore, QtGui, uic
 import subprocess
+import distutils.spawn
+from libraries.pyper import *
+from PyQt4 import QtCore, QtGui, uic
 
 app = QtGui.QApplication(sys.argv)
 form_class, base_class = uic.loadUiType(os.path.join('ui', 'Stat_Maker.ui'))
+
 
 class MyListWidgetItem(QtGui.QListWidgetItem):
     def __init__(self, *args):
@@ -55,17 +58,20 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         self.process.started.connect(self.process_started)
         self.process.finished.connect(self.process_finished)
         # QThread for processes
-        self.thread = QtCore.QThread(self)
-        self.run_btn.setEnabled(False)
+        # self.run_btn.setEnabled(False)
         self.data = {}
+        self.directory = '/'
+        self.jags_path = ''
+        self.r = R(RCMD='./statistics/R/bin/R')
+        self.r("require('deepn')")
 
-        thread.start_new_thread(self.monitor_files, ())
+        # thread.start_new_thread(self.monitor_files, ())
 
     def pair_check(self, list1, list2):
-        if list1.count() > 0:
-            if list2.count() > 0:
-                return True
-        return False
+        if list1.count() > 0 and list2.count() > 0:
+            return True
+        else:
+            return False
 
     def either_check(self, list1, list2):
         if (list1.count() > 0 and list2.count() > 0) or (list1.count() == 0 and list2.count() == 0):
@@ -76,7 +82,8 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
     def monitor_files(self):
         while 1:
             if self.pair_check(self.vec_sel_list, self.vec_nonsel_list) and \
-                    self.pair_check(self.bait1_sel_list, self.bait1_nonsel_list):
+                    self.pair_check(self.bait1_sel_list, self.bait1_nonsel_list) and \
+                    self.pair_check(self.vec_sel_list_2, self.vec_nonsel_list_2):
                 if self.either_check(self.bait2_sel_list, self.bait2_nonsel_list) and \
                         self.either_check(self.vec_sel_list_2, self.vec_nonsel_list_2) and \
                         self.either_check(self.bait1_sel_list_2, self.bait1_nonsel_list_2) and \
@@ -84,6 +91,11 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
                     self.run_btn.setEnabled(True)
                 else:
                     self.run_btn.setEnabled(False)
+
+
+            self.jags_path = distutils.spawn.find_executable("jags")
+            if not len(self.jags_path) > 3:
+                self.process.start('open', ['statistics/JAGS.pkg'])
             time.sleep(0.1)
 
     def process_started(self):
@@ -113,7 +125,7 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
 
     def get_path(self, program):
         try:
-            cmd = "brew info " + program + " | grep /usr/local/Cellar"
+            cmd = "which " + program
             ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             output = ps.communicate()[0]
             if len(output) > 0:
@@ -155,15 +167,16 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         directory = str(QtGui.QFileDialog.getExistingDirectory(QtGui.QFileDialog(), "Locate Work Folder",
                                                                     os.path.expanduser("~"),
                                                                     QtGui.QFileDialog.ShowDirsOnly))
+        self.directory = directory
         try:
-            dirlist = os.listdir(directory)
+            dirlist = os.listdir(self.directory)
             existing_items = []
             for index in xrange(self.file_list.count()):
                 existing_items.append(str(self.file_list.item(index).text()))
 
             for file in dirlist:
                 if not re.match('^\.', file) and re.match('.+summary\.csv', file) and file not in existing_items:
-                    path = os.path.join(directory, file)
+                    path = os.path.join(self.directory, file)
                     fileInfo = QtCore.QFileInfo(path)
                     iconProvider = QtGui.QFileIconProvider()
                     icon = iconProvider.icon(fileInfo)
@@ -235,31 +248,36 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         if os.path.exists(path):
             self.fileDropped(self.bait2_nonsel_list_2, path, "Bait2_Non-Selected_2")
 
+    def write_four_columns_from_csv(self, csv_file):
+        filehandle = open(csv_file, 'r')
+        outhandle = open(csv_file[:-4] + "_temp.csv", 'w')
+        count = 0
+        for line in filehandle.readlines():
+            if count > 3:
+                split = line.split(',')
+                last = "\"" + "-".join(split[3:]) + "\""
+                outhandle.write("%s,%s,%s,%s\n" % (split[0], split[1], split[2], last))
+            count += 1
+        outhandle.close()
+
+
     def write_r_input(self):
-        output = open(os.path.join(os.path.curdir, 'rscript_input.params'), 'w')
+        output = open(os.path.join(self.directory, 'rscript_input.params'), 'w')
         for key in self.data.keys():
-            output.write("%s = %s\n" % (key, self.data[key]))
-        output.write("Threshold = %d" % self.threshold_sbx.value())
+            self.write_four_columns_from_csv(self.data[key])
+            output.write("%-25s = %s_temp.csv\n" % (key, self.data[key][:-4]))
+        output.write("%-25s = %d\n" % ("Threshold", self.threshold_sbx.value()))
+        # output.write("%-25s = %s\n" % ("R Path", self.r_path))
+        # output.write("%-25s = %s" % ("JAGS Path", self.jags_path))
         output.close()
 
     @QtCore.pyqtSlot()
     def on_run_btn_clicked(self):
         self.write_r_input()
-
-        if not self.which('brew'):
-            self.process.start('yes', ['\'\'', '|', '/usr/bin/ruby', '-e', '\"$(curl -fsSL '
-                                                    'https://raw.githubusercontent.com/Homebrew/install/master/install)\"'])
-        if not self.which('Rscript'):
-            self.process.start('brew', ['install', 'r'])
-
-        if not self.which('jags'):
-            self.process.start('brew', ['install', 'jags'])
-
-        r_path = os.path.join(self.get_path('R'), 'bin', 'Rscript')
-        jags_path = os.path.join(self.get_path('jags'), 'bin', 'jags')
-
-        print jags_path
-        self.process.start(r_path, [os.path.join(os.path.curdir, 'sample.r')])
+        self.r("analyzeDeepn('" + os.path.join(self.directory, 'rscript_input.params') + "', outfile='" + \
+               os.path.join(self.directory, 'statmaker_output.csv') + "')")
+        self.statusbar.showMessage("Saved to File: %s" % os.path.join(self.directory, 'statmaker_output.csv'))
+        # self.process.start(self.r_path, [os.path.join(self.directory, 'sample.r')])
 
 
 def appExit():

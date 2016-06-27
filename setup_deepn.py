@@ -44,7 +44,7 @@ def find_data_files(sources, targets, patterns):
 
 APP = ['deepn.py']
 INCLUDES = ['sip', 'PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc',
-                        'json', 'numbers', 'hashlib', 'decimal', 'thread', 'itertools', 'pyqtgraph']
+            'json', 'numbers', 'hashlib', 'decimal', 'thread', 'itertools', 'pyqtgraph']
 OPTIONS = {'argv_emulation': True,
            'includes': INCLUDES,
            'iconfile' : 'icon/Icon.icns',
