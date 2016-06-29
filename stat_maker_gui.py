@@ -1,10 +1,9 @@
-import sys
 import os
 import re
 import thread
+import glob
 import time
 import subprocess
-import distutils.spawn
 from libraries.pyper import *
 from PyQt4 import QtCore, QtGui, uic
 
@@ -16,8 +15,10 @@ class MyListWidgetItem(QtGui.QListWidgetItem):
     def __init__(self, *args):
         super(MyListWidgetItem, self).__init__(*args)
         self.data = ''
+
     def GetData(self):
         return self.data
+
 
 class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
     def __init__(self, *args):
@@ -50,22 +51,27 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         self.connect(self.bait1_nonsel_list_2, QtCore.SIGNAL("deleted"), self.file_deleted)
         self.connect(self.bait2_sel_list_2, QtCore.SIGNAL("deleted"), self.file_deleted)
         self.connect(self.bait2_nonsel_list_2, QtCore.SIGNAL("deleted"), self.file_deleted)
+        # self.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint)
 
-        # QProcess object for external app
-        self.process = QtCore.QProcess(self)
-        self.process.readyReadStandardOutput.connect(self.stdout_ready)
-        self.process.readyReadStandardError.connect(self.stderr_ready)
-        self.process.started.connect(self.process_started)
-        self.process.finished.connect(self.process_finished)
         # QThread for processes
-        # self.run_btn.setEnabled(False)
+        self.process = None
+        self.run_btn.setEnabled(False)
         self.data = {}
-        self.directory = '/'
-        self.jags_path = ''
-        self.r = R(RCMD='./statistics/R/bin/R')
-        self.r("require('deepn')")
+        self.directory = '~/'
+        self.jags_path = None
+        self.r_path = None
+        self.started = 0
 
         # thread.start_new_thread(self.monitor_files, ())
+
+    def dataReady(self, p):
+        print str(p.readAllStandardOutput()).strip()
+
+    def started(self):
+        print "Started!"
+
+    def finished(self):
+        print "Finished"
 
     def pair_check(self, list1, list2):
         if list1.count() > 0 and list2.count() > 0:
@@ -80,37 +86,31 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
             return False
 
     def monitor_files(self):
-        while 1:
-            if self.pair_check(self.vec_sel_list, self.vec_nonsel_list) and \
-                    self.pair_check(self.bait1_sel_list, self.bait1_nonsel_list) and \
-                    self.pair_check(self.vec_sel_list_2, self.vec_nonsel_list_2):
-                if self.either_check(self.bait2_sel_list, self.bait2_nonsel_list) and \
-                        self.either_check(self.vec_sel_list_2, self.vec_nonsel_list_2) and \
-                        self.either_check(self.bait1_sel_list_2, self.bait1_nonsel_list_2) and \
-                        self.either_check(self.bait2_sel_list_2, self.bait2_nonsel_list_2):
-                    self.run_btn.setEnabled(True)
-                else:
-                    self.run_btn.setEnabled(False)
+        if self.pair_check(self.vec_sel_list, self.vec_nonsel_list) and \
+                self.pair_check(self.bait1_sel_list, self.bait1_nonsel_list) and \
+                self.pair_check(self.vec_sel_list_2, self.vec_nonsel_list_2):
+            if self.either_check(self.bait2_sel_list, self.bait2_nonsel_list) and \
+                    self.either_check(self.vec_sel_list_2, self.vec_nonsel_list_2) and \
+                    self.either_check(self.bait1_sel_list_2, self.bait1_nonsel_list_2) and \
+                    self.either_check(self.bait2_sel_list_2, self.bait2_nonsel_list_2):
+                self.run_btn.setEnabled(True)
+            else:
+                self.run_btn.setEnabled(False)
 
+        if not self.process == None:
+            try:
+                os.kill(self.process.pid + 1, 0)
+            except OSError:
+                self.statusbar.showMessage("Finished Installation", 8000)
+                self.started = 0
 
-            self.jags_path = distutils.spawn.find_executable("jags")
-            if not len(self.jags_path) > 3:
-                self.process.start('open', ['statistics/JAGS.pkg'])
-            time.sleep(0.1)
+        if not os.path.exists('/usr/local/bin/jags') and self.started == 0:
+            self.process = subprocess.Popen('open statistics/JAGS.pkg', shell=True)
+            self.started = 1
 
-    def process_started(self):
-        self.statusbar.showMessage("Process Started", 5000)
-
-    def process_finished(self):
-        self.statusbar.showMessage("Process ended!", 5000)
-
-    def stdout_ready(self):
-        text = str(self.process.readAllStandardOutput()).strip()
-        self.statusbar.showMessage(text)
-
-    def stderr_ready(self):
-        text = str(self.process.readAllStandardError())
-        self.append(text)
+        if not os.path.exists('/usr/local/bin/R') and self.started == 0:
+            self.process = subprocess.Popen('open statistics/R.pkg', shell=True)
+            self.started = 1
 
     def which(self, program):
         try:
@@ -131,7 +131,7 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
             if len(output) > 0:
                 return output.rstrip().split()[0]
         except OSError:
-            return False
+            return None
 
     def file_deleted(self, path):
         for key in self.data.keys():
@@ -150,6 +150,7 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
             list.clear()
             list.addItem(item)
             self.data[key] = url
+        self.monitor_files()
 
     def check_uniqueness(self, path):
         for url in self.data.values():
@@ -165,8 +166,8 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
     @QtCore.pyqtSlot()
     def on_folder_choice_btn_clicked(self):
         directory = str(QtGui.QFileDialog.getExistingDirectory(QtGui.QFileDialog(), "Locate Work Folder",
-                                                                    os.path.expanduser("~"),
-                                                                    QtGui.QFileDialog.ShowDirsOnly))
+                                                               os.path.expanduser("~"),
+                                                               QtGui.QFileDialog.ShowDirsOnly))
         self.directory = directory
         try:
             dirlist = os.listdir(self.directory)
@@ -249,6 +250,7 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
             self.fileDropped(self.bait2_nonsel_list_2, path, "Bait2_Non-Selected_2")
 
     def write_four_columns_from_csv(self, csv_file):
+
         filehandle = open(csv_file, 'r')
         outhandle = open(csv_file[:-4] + "_temp.csv", 'w')
         count = 0
@@ -260,9 +262,8 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
             count += 1
         outhandle.close()
 
-
     def write_r_input(self):
-        output = open(os.path.join(self.directory, 'rscript_input.params'), 'w')
+        output = open(os.path.join(self.directory, 'r_input.params'), 'w')
         for key in self.data.keys():
             self.write_four_columns_from_csv(self.data[key])
             output.write("%-25s = %s_temp.csv\n" % (key, self.data[key][:-4]))
@@ -271,14 +272,47 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         # output.write("%-25s = %s" % ("JAGS Path", self.jags_path))
         output.close()
 
+    def set_interaction_state(self, state):
+        self.run_btn.setEnabled(state)
+        self.file_list.setEnabled(state)
+        self.vec_sel_list.setEnabled(state)
+        self.vec_nonsel_list.setEnabled(state)
+        self.bait1_sel_list.setEnabled(state)
+        self.bait1_nonsel_list.setEnabled(state)
+        self.bait2_sel_list.setEnabled(state)
+        self.bait2_nonsel_list.setEnabled(state)
+
+        self.vec_sel_list_2.setEnabled(state)
+        self.vec_nonsel_list_2.setEnabled(state)
+        self.bait1_sel_list_2.setEnabled(state)
+        self.bait1_nonsel_list_2.setEnabled(state)
+        self.bait2_sel_list_2.setEnabled(state)
+        self.bait2_nonsel_list_2.setEnabled(state)
+        self.folder_choice_btn.setEnabled(state)
+        self.quit_btn.setEnabled(state)
+        self.threshold_sbx.setEnabled(state)
+
+    def runr(self):
+        self.r("analyzeDeepn('" + os.path.join(self.directory, 'r_input.params') + "', outfile='" + \
+               os.path.join(self.directory, 'statmaker_output.csv') + "')")
+        self.statusbar.showMessage("Saved Results to File: %s" % os.path.join(self.directory, 'statmaker_output.csv'))
+        map(os.remove, glob.glob(os.path.join(self.directory, "*_temp.csv")))
+        self.set_interaction_state(True)
+
     @QtCore.pyqtSlot()
     def on_run_btn_clicked(self):
-        self.write_r_input()
-        self.r("analyzeDeepn('" + os.path.join(self.directory, 'rscript_input.params') + "', outfile='" + \
-               os.path.join(self.directory, 'statmaker_output.csv') + "')")
-        self.statusbar.showMessage("Saved to File: %s" % os.path.join(self.directory, 'statmaker_output.csv'))
-        # self.process.start(self.r_path, [os.path.join(self.directory, 'sample.r')])
-
+        self.r = R(RCMD='/usr/local/bin/R')
+        dout = self.r("require('deepn')")
+        dout = dout.replace(' ', '')
+        dout = dout.replace('\n', '')
+        if re.match('.+nopackage.+', dout):
+            self.statusbar.showMessage("DEEPN R Package Not Found. To install follow instructions in the manual.")
+        else:
+            self.statusbar.showMessage("Running DEEPN statistics... Please Wait...")
+            self.write_r_input()
+            self.set_interaction_state(False)
+            thread.start_new_thread(self.runr, ())
+            # self.process.start(self.r_path, [os.path.join(self.directory, 'sample.r')])
 
 def appExit():
     app.quit()

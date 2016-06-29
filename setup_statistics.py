@@ -1,13 +1,12 @@
 import os
 import sys
 import glob
-import fnmatch
 from setuptools import setup
 if sys.platform == 'darwin':
     import py2app
 elif sys.platform == 'win32':
     import py2exe
-sys.setrecursionlimit(2000)
+sys.setrecursionlimit(100000)
 
 def find_data_files(sources, targets, patterns):
     """Locates the specified data-files and returns the matches
@@ -37,8 +36,8 @@ def find_data_files(sources, targets, patterns):
 
 
 APP = ['stat_maker_gui.py']
-INCLUDES = ['sip', 'PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc', 'distutils.spawn'
-            'json', 'numbers', 'hashlib', 'decimal', 'thread', 'itertools', 'pyqtgraph']
+INCLUDES = ['sip', 'PyQt4', 'glob', 'cPickle', 'time', 're', 'os', 'pydoc',
+            'json', 'numbers', 'hashlib', 'decimal', 'thread', 'itertools', 'subprocess']
 EXCLUDES = ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest',
             'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon']
 OPTIONS = {'argv_emulation': True,
@@ -54,7 +53,7 @@ OPTIONS = {'argv_emulation': True,
            }
 DATA_FILES = find_data_files(['ui', '', 'statistics', 'libraries'],
                              ['ui', 'lib/python2.7', 'statistics', 'libraries'],
-                             ['Stat_Maker.ui', 'DragDropListView.py', '*.pkg', 'pyper.py'])
+                             ['Stat_Maker.ui', 'DragDropListView.py', '*.pkg', '*.py'])
 
 if sys.platform == 'darwin':
     setup(
@@ -65,7 +64,7 @@ if sys.platform == 'darwin':
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         data_files=DATA_FILES
     )
-    os.system('cp -r statistics/R dist/Stat\ Maker.app/Contents/Resources/statistics/')
+    # os.system('cp -r statistics/R dist/Stat\ Maker.app/Contents/Resources/statistics/')
 elif sys.platform == 'win32':
     origIsSystemDLL = py2exe.build_exe.isSystemDLL
     def isSystemDLL(pathname):
