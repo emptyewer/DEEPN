@@ -51,9 +51,9 @@ OPTIONS = {'argv_emulation': True,
            'includes': INCLUDES,
            'excludes': EXCLUDES,
            }
-DATA_FILES = find_data_files(['ui', '', 'statistics', 'libraries'],
-                             ['ui', 'lib/python2.7', 'statistics', 'libraries'],
-                             ['Stat_Maker.ui', 'DragDropListView.py', '*.pkg', '*.py'])
+DATA_FILES = find_data_files(['ui', '', 'statistics', 'libraries', ''],
+                             ['ui', 'lib/python2.7', 'statistics', 'libraries', ''],
+                             ['Stat_Maker.ui', 'DragDropListView.py', '*.pkg', '*.py', 'install_deepn.sh'])
 
 if sys.platform == 'darwin':
     setup(
