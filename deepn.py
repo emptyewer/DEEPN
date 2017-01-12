@@ -13,7 +13,10 @@ import functions.message as m
 from PyQt4 import QtCore, QtGui, uic
 
 app = QtGui.QApplication(sys.argv)
-form_class, base_class = uic.loadUiType(os.path.join('ui', 'DEEPN.ui'))
+ui_path = os.path.join('ui', 'DEEPN.ui')
+if sys.platform == 'win32':
+    ui_path = os.path.join('ui', 'Windows', 'DEEPN.ui')
+form_class, base_class = uic.loadUiType(ui_path)
 
 class vQlistWidgetItem(QtGui.QListWidgetItem):
     def __init__(self, value, data):
@@ -307,7 +310,9 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
                 if sys.platform == 'win32':
-                    self.process.start('Gene Count\Gene Count.exe', [self.directory, self.gene_dictionary, self.chromosome_list])
+                    self.process.start('Gene Count\gene_count_gui.exe', [self.directory, self.gene_dictionary,
+                                                             self.chromosome_list])
+                    # self.process.start('python', ['gene_count_gui.py', self.directory, self.gene_dictionary, self.chromosome_list])
                 elif sys.platform == 'darwin':
                     # print " ".join([self.directory, self.gene_dictionary, self.chromosome_list])
                     self.process.start('Gene Count.app/Contents/MacOS/Gene Count', [self.directory, self.gene_dictionary, self.chromosome_list])
@@ -327,9 +332,11 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
                 if sys.platform == 'win32':
-                    self.process.start('Junction Make\Junction Make.exe',
+                    self.process.start('Junction Make\junction_make_gui.exe',
                                 [self.directory, str(self.junction_sequence_txt.text()),
                                 str(self.exclude_sequence_txt.text()), self.blast_db_name])
+                    # self.process.start('python', ['junction_make_gui.py', self.directory, str(self.junction_sequence_txt.text()),
+                    #             str(self.exclude_sequence_txt.text()), self.blast_db_name])
                 elif sys.platform == 'darwin':
                     self.process.start('Junction Make.app/Contents/MacOS/Junction Make',
                                 [self.directory, str(self.junction_sequence_txt.text()),
@@ -352,13 +359,13 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
                 if sys.platform == 'win32':
-                    self.process.start('GCJM/GCJM.exe', [self.directory,
+                    self.process.start('GCJM/gc_jm.exe', [self.directory,
                                                                 self.gene_dictionary, self.chromosome_list,
                                                                 str(self.junction_sequence_txt.text()),
                                                                 str(self.exclude_sequence_txt.text()),
                                                                 self.blast_db_name,
-                                                                'Gene Count\Gene Count.exe',
-                                                                'Junction Make\Junction Make.exe'])
+                                                                'Gene Count\gene_count_gui.exe',
+                                                                'Junction Make\junction_make_gui.exe'])
                 elif sys.platform == 'darwin':
                     self.process.start('GCJM.app/Contents/MacOS/GCJM', [self.directory,
                                                                 self.gene_dictionary, self.chromosome_list,

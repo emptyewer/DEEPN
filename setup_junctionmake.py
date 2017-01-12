@@ -52,9 +52,9 @@ DATA_FILES_OSX = find_data_files(['functions', 'ui', 'libraries/joblib', 'ncbi_b
                                  ['functions', 'ui', 'libraries/joblib', 'ncbi_blast/bin/osx/x64', 'ncbi_blast/db', ''],
                                  ['*.py', '*.ui', '*.py', '*', '*', '*.txt'])
 
-DATA_FILES_WIN = find_data_files(['functions', 'ui', 'libraries/joblib', 'ncbi_blast/bin/windows/x64', 'ncbi_blast/bin/windows/x32', 'ncbi_blast/db', '.'],
-                                 ['functions', 'ui', 'libraries/joblib', 'ncbi_blast/bin/windows/x64', 'ncbi_blast/bin/windows/x32', 'ncbi_blast/db', ''],
-                                 ['*.py', '*.ui', '*.py', '*', '*', '*', '*.txt'])
+DATA_FILES_WIN = find_data_files(['functions', 'ui', 'ui/Windows', 'libraries/joblib', 'ncbi_blast/bin/windows/x64', 'ncbi_blast/bin/windows/x32', 'ncbi_blast/db', '.'],
+                                 ['functions', 'ui', 'ui/Windows', 'libraries/joblib', 'ncbi_blast/bin/windows/x64', 'ncbi_blast/bin/windows/x32', 'ncbi_blast/db', ''],
+                                 ['*.py', '*.ui', '*.ui', '*.py', '*', '*', '*', '*.txt'])
 if sys.platform == 'darwin':
     setup(
         app=APP,
@@ -72,13 +72,14 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
+        console=APP,
         version='1.1',
         description='Junction Make',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
-        windows=[{"script":'junction_make_gui.py',
-                   "icon_resources": [(1, "icon/Icon3.ico")],
-                   "dest_base":"Junction Make"
-                }],
+        # windows=[{"script":'junction_make_gui.py',
+        #            "icon_resources": [(1, "icon/Icon3.ico")],
+        #            "dest_base":"Junction Make"
+        #         }],
         data_files=DATA_FILES_WIN,
         options={"py2exe": {'includes': INCLUDES,
                             "optimize": 2,

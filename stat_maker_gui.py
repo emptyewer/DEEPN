@@ -134,7 +134,7 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
     @QtCore.pyqtSlot()
     def on_verify_installation_btn_clicked(self):  #####################   new definition
 
-        if not os.path.exists('/usr/local/bin/jags') or os.path.exists('/usr/bin/jags'):
+        if not self.get_exec_path('jags'):
             self.verify_installation_btn.setText("Installing JAGS...")
             self.process = subprocess.Popen('open statistics/JAGS.pkg', shell=True)
             while not self.get_exec_path('jags'):
@@ -145,7 +145,7 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         if os.path.exists('/usr/bin/jags'):
             self.jags_path = '/usr/bin/jags'
 
-        if not os.path.exists('/usr/local/bin/R') or os.path.exists('/usr/bin/R'):
+        if not self.get_exec_path('R'):
             self.verify_installation_btn.setText("Installing R...")
             self.process = subprocess.Popen('open statistics/R.pkg', shell=True)
             while not self.get_exec_path('R'):

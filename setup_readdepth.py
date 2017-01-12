@@ -48,9 +48,9 @@ OPTIONS = {'argv_emulation': True,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript',
                         'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
            }
-DATA_FILES = find_data_files(['functions', 'libraries/xlsxwriter', 'lists', 'ui', '.'],
-                               ['functions', 'libraries/xlsxwriter', 'lists', 'ui', ''],
-                               ['*.py', '*.py', '*.prn', '*.ui', '*.txt'])
+DATA_FILES = find_data_files(['functions', 'libraries/xlsxwriter', 'lists', 'ui', 'ui/Windows', '.'],
+                               ['functions', 'libraries/xlsxwriter', 'lists', 'ui', 'ui/Windows', ''],
+                               ['*.py', '*.py', '*.prn', '*.ui', '*.ui', '*.txt'])
 if sys.platform == 'darwin':
     setup(
         app=APP,

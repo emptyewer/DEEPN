@@ -6,7 +6,10 @@ from PyQt4 import QtCore, QtGui, uic
 import numpy as np
 
 app = QtGui.QApplication(sys.argv)
-form_class, base_class = uic.loadUiType(os.path.join(os.path.curdir, 'ui', 'QBGraph.ui'))
+ui_path = os.path.join(os.path.curdir, 'ui', 'QBGraph.ui')
+if sys.platform == 'win32':
+    ui_path = os.path.join(os.path.curdir, 'ui', 'Windows', 'QBGraph.ui')
+form_class, base_class = uic.loadUiType(ui_path)
 
 __all__ = ['BarGraphItem']
 

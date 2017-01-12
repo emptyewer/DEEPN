@@ -57,9 +57,9 @@ OPTIONS = {'argv_emulation': True,
            'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
            }
-DATA_FILES = find_data_files(['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', '.'],
-                             ['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', ''],
-                             ['*.py', '*.py', '*.py', '*.ui', '*', '*.txt'])
+DATA_FILES = find_data_files(['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', '.', 'ui/Windows'],
+                             ['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', '', 'ui/Windows'],
+                             ['*.py', '*.py', '*.py', '*.ui', '*', '*.txt', '*.ui'])
 if sys.platform == 'darwin':
     setup(
         app=APP,
@@ -77,13 +77,14 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
+        console=APP,
         version='1.1',
         description='Gene Count',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
-        windows=[{"script":'gene_count_gui.py',
-                   "icon_resources": [(1, "icon/Icon2.ico")],
-                   "dest_base":"Gene Count"
-                }],
+        # windows=[{"script":'gene_count_gui.py',
+        #            "icon_resources": [(1, "icon/Icon2.ico")],
+        #            "dest_base":"Gene Count"
+        #         }],
         data_files=DATA_FILES,
         options={"py2exe": {'includes': INCLUDES,
                             "optimize": 2,

@@ -64,7 +64,7 @@
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>100</height>
+         <height>110</height>
         </size>
        </property>
        <property name="font">
@@ -81,6 +81,9 @@
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>
+       <property name="resizeMode">
+        <enum>QListView::Fixed</enum>
+       </property>
        <property name="spacing">
         <number>5</number>
        </property>
@@ -90,7 +93,13 @@
          <height>20</height>
         </size>
        </property>
+       <property name="viewMode">
+        <enum>QListView::ListMode</enum>
+       </property>
        <property name="uniformItemSizes">
+        <bool>true</bool>
+       </property>
+       <property name="wordWrap">
         <bool>true</bool>
        </property>
       </widget>
@@ -465,22 +474,5 @@
   <tabstop>read_depth_btn</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>quit_btn</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>273</x>
-     <y>649</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>274</x>
-     <y>349</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

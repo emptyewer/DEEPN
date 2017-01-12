@@ -55,9 +55,9 @@ OPTIONS = {'argv_emulation': True,
                      'CFBundleVersion': '11',
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],}
-DATA_FILES = find_data_files(['functions', 'ui', '.'],
-                             ['functions', 'ui', ''],
-                             ['*.py', '*.ui', '*.sqlite3'])
+DATA_FILES = find_data_files(['functions', 'ui', '.', 'ui/Windows'],
+                             ['functions', 'ui', '', 'ui/Windows'],
+                             ['*.py', '*.ui', '*.sqlite3', '*.ui'])
 if sys.platform == 'darwin':
     setup(
         app=APP,

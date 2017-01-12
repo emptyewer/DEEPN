@@ -14,6 +14,7 @@ junction_sequence = sys.argv[2]
 exclusion_sequence = sys.argv[3]
 blast_db_name = sys.argv[4]
 
+
 def initialize_folders(directory):
     fileio.create_new_folder(directory, junction_folder)
     # Creates the folder that will hold the Genecounts summaries

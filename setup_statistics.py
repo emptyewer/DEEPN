@@ -73,6 +73,7 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
+        console=APP,
         version='1.1',
         description='Read Depth',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',

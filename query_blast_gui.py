@@ -11,7 +11,10 @@ import functions.fileio_gui as f
 import functions.plot as plot
 
 app = QtGui.QApplication(sys.argv)
-form_class, base_class = uic.loadUiType(os.path.join('ui', 'Query_Blast.ui'))
+ui_path = os.path.join('ui', 'Query_Blast.ui')
+if sys.platform == 'win32':
+    ui_path = os.path.join('ui', 'Windows', 'Query_Blast.ui')
+form_class, base_class = uic.loadUiType(ui_path)
 
 main_directory = sys.argv[1]
 gene_list_file = sys.argv[2]

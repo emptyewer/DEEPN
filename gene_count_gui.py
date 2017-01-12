@@ -17,7 +17,6 @@ summary_folder = "gene_count_summary"
 # Creates the folder that will hold more granualar data on exon counts per chromosome
 chromosomes_folder = "chromosome_files"
 
-
 main_directory = sys.argv[1]
 gene_dictionary = sys.argv[2]
 chromosomes_list_name = sys.argv[3]
@@ -35,7 +34,6 @@ def timeit(method):
 def get_dictionary(fileName):
     dictionary = pickle.load(open(fileName, 'rb'))
     return dictionary
-
 
 def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
     totalReads = 0

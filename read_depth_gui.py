@@ -11,7 +11,10 @@ import functions.plot as plot
 import functions.process as process
 
 app = QtGui.QApplication(sys.argv)
-form_class, base_class = uic.loadUiType(os.path.join('ui', 'Read_Depth.ui'))
+ui_path = os.path.join('ui', 'Read_Depth.ui')
+if sys.platform == 'win32':
+    ui_path = os.path.join('ui', 'Windows', 'Read_Depth.ui')
+form_class, base_class = uic.loadUiType(ui_path)
 pg.setConfigOption('background', (236, 236, 236))
 pg.setConfigOption('foreground', 'k')
 
