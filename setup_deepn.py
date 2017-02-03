@@ -12,6 +12,7 @@ import glob
 from setuptools import setup
 if sys.platform == 'darwin':
     import py2app
+    # from cx_Freeze import setup
 elif sys.platform == 'win32':
     import py2exe
 sys.setrecursionlimit(100000)
@@ -50,9 +51,9 @@ OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon.icns',
            'plist': {'CFBundleGetInfoString': 'DEEPN Sequencing',
                      'CFBundleIdentifier': 'edu.uiowa.robertpiper.deepn',
-                     'CFBundleShortVersionString': '1.1',
+                     'CFBundleShortVersionString': '1.5',
                      'CFBundleName': 'DEEPN',
-                     'CFBundleVersion': '11',
+                     'CFBundleVersion': '15',
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],}
 DATA_FILES = find_data_files(['functions', 'ui', '.', 'ui/Windows'],
@@ -75,7 +76,7 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
-        version='1.1',
+        version='1.5',
         description='DEEPN',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'deepn.py',

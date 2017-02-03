@@ -9,3 +9,5 @@ ncbi_blast.tar.bz2
 build/
 dist/
 *.pyc
+.DS_Store
+.gitignore

@@ -4,7 +4,6 @@ import re
 import time
 import thread
 import itertools
-import pyqtgraph as pg
 import functions.db as db
 import functions.fileio_gui as f
 import functions.printio_gui as p
@@ -35,6 +34,7 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
         self.clicked_button = None
         self.clicked_button_text = None
         self.db_selection = None
+        self.combined = 0
         self.blast_db_name = ''
         self.gene_dictionary = ''
         self.gene_list_file = ''
@@ -116,6 +116,11 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
         else:
             os.makedirs(os.path.join(self.directory, 'unmapped_sam_files'))
 
+        if os.path.exists(os.path.join(self.directory, 'sam_files')):
+            pass
+        else:
+            os.makedirs(os.path.join(self.directory, 'sam_files'))
+
     def check_path(self, root, folders):
         existing_directories = []
         for dir in folders:
@@ -168,23 +173,32 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             pass
 
     def monitor_directory_for_changes(self):
+        def enable_buttons():
+            self.junction_sequence_txt.setEnabled(True)
+            self.exclude_sequence_txt.setEnabled(True)
+            self.gene_count_btn.setEnabled(True)
+            self.junction_make_btn.setEnabled(True)
+            self.gene_count_junction_make_btn.setEnabled(True)
+            self.db_list_wgt.setEnabled(True)
+            self.status_txt.setText(self.directory)
+
         while self.proceed == 1:
-            if len(self.fileio.get_file_list(self.directory, 'mapped_sam_files', '.sam')) <= 0 or \
-                    len(self.fileio.get_file_list(self.directory, 'unmapped_sam_files', '.sam')) <= 0:
-                self.gene_count_btn.setEnabled(False)
-                self.junction_make_btn.setEnabled(False)
-                self.gene_count_junction_make_btn.setEnabled(False)
-                self.status_txt.setText('Waiting to load .sam files into selected directory...')
+            if len(self.fileio.get_file_list(self.directory, 'sam_files', '.sam')) == 0:
+                if len(self.fileio.get_file_list(self.directory, 'mapped_sam_files', '.sam')) <= 0 or \
+                        len(self.fileio.get_file_list(self.directory, 'unmapped_sam_files', '.sam')) <= 0:
+                    self.gene_count_btn.setEnabled(False)
+                    self.junction_make_btn.setEnabled(False)
+                    self.gene_count_junction_make_btn.setEnabled(False)
+                    self.status_txt.setText('Waiting to load .sam files into selected directory...')
+                else:
+                    self.combined = 0
+                    enable_buttons()
             else:
-                self.junction_sequence_txt.setEnabled(True)
-                self.exclude_sequence_txt.setEnabled(True)
-                self.gene_count_btn.setEnabled(True)
-                self.junction_make_btn.setEnabled(True)
-                self.gene_count_junction_make_btn.setEnabled(True)
-                self.status_txt.setText(self.directory)
+                self.combined = 1
+                enable_buttons()
 
             if os.path.exists(os.path.join(self.directory, 'blast_results_query')):
-                if len(self.fileio.get_file_list(self.directory, 'blast_results_query', '.p')) <= 0:
+                if len(self.fileio.get_file_list(self.directory, 'blast_results_query', '.bqp')) <= 0:
                     self.query_blast_btn.setEnabled(False)
                 else:
                     self.query_blast_btn.setEnabled(True)
@@ -309,13 +323,13 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
                 self.check_path(self.directory, ['gene_count_summary', 'chromosome_files'])
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
+                arguments = [self.directory, self.gene_dictionary, self.chromosome_list, str(self.combined)]
                 if sys.platform == 'win32':
-                    self.process.start('Gene Count\gene_count_gui.exe', [self.directory, self.gene_dictionary,
-                                                             self.chromosome_list])
+                    self.process.start('Gene Count\gene_count_gui.exe', arguments)
                     # self.process.start('python', ['gene_count_gui.py', self.directory, self.gene_dictionary, self.chromosome_list])
                 elif sys.platform == 'darwin':
                     # print " ".join([self.directory, self.gene_dictionary, self.chromosome_list])
-                    self.process.start('Gene Count.app/Contents/MacOS/Gene Count', [self.directory, self.gene_dictionary, self.chromosome_list])
+                    self.process.start('Gene Count.app/Contents/MacOS/Gene Count', arguments)
             else:
                 self.process_finished()
         elif self.clicked_button == self.sender():
@@ -331,18 +345,14 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
                 self.check_path(self.directory, ['junction_files', 'blast_results', 'blast_results_query'])
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
+                arguments = [self.directory, str(self.junction_sequence_txt.text()),
+                             str(self.exclude_sequence_txt.text()), self.blast_db_name, self.gene_list_file, str(self.combined)]
                 if sys.platform == 'win32':
-                    self.process.start('Junction Make\junction_make_gui.exe',
-                                [self.directory, str(self.junction_sequence_txt.text()),
-                                str(self.exclude_sequence_txt.text()), self.blast_db_name])
-                    # self.process.start('python', ['junction_make_gui.py', self.directory, str(self.junction_sequence_txt.text()),
-                    #             str(self.exclude_sequence_txt.text()), self.blast_db_name])
+                    self.process.start('Junction Make\junction_make_gui.exe', arguments)
+                    self.process.start('python', arguments)
                 elif sys.platform == 'darwin':
-                    self.process.start('Junction Make.app/Contents/MacOS/Junction Make',
-                                [self.directory, str(self.junction_sequence_txt.text()),
-                                str(self.exclude_sequence_txt.text()), self.blast_db_name])
-                    # print 'python ', 'junction_make_gui.py ', self.directory, str(self.junction_sequence_txt.text()),\
-                    #     str(self.exclude_sequence_txt.text()), self.blast_db_name
+                    self.process.start('Junction Make.app/Contents/MacOS/Junction Make', arguments)
+                    # print './Junction Make.app/Contents/MacOS/Junction Make ', " ".join(arguments)
 
             else:
                 self.process_finished()
@@ -355,25 +365,25 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             self.clicked_button = self.sender()
             self.clicked_button_text = self.clicked_button.text()
             if self.prompt == 2:
-                self.check_path(self.directory, ['junction_files', 'blast_results', 'blast_results_query', 'gene_count_summary', 'chromosome_files'])
+                self.check_path(self.directory, ['junction_files', 'blast_results',
+                                                 'blast_results_query', 'gene_count_summary',
+                                                 'chromosome_files'])
             if self.quit == False:
                 self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
+                arguments = [self.directory,
+                            self.gene_dictionary, self.chromosome_list,
+                            str(self.junction_sequence_txt.text()),
+                            str(self.exclude_sequence_txt.text()),
+                            self.blast_db_name,
+                            '../../../Gene Count.app/Contents/MacOS/Gene Count',
+                            '../../../Junction Make.app/Contents/MacOS/Junction Make',
+                            self.gene_list_file,
+                            str(self.combined)]
+
                 if sys.platform == 'win32':
-                    self.process.start('GCJM/gc_jm.exe', [self.directory,
-                                                                self.gene_dictionary, self.chromosome_list,
-                                                                str(self.junction_sequence_txt.text()),
-                                                                str(self.exclude_sequence_txt.text()),
-                                                                self.blast_db_name,
-                                                                'Gene Count\gene_count_gui.exe',
-                                                                'Junction Make\junction_make_gui.exe'])
+                    self.process.start('GCJM/gc_jm.exe', arguments)
                 elif sys.platform == 'darwin':
-                    self.process.start('GCJM.app/Contents/MacOS/GCJM', [self.directory,
-                                                                self.gene_dictionary, self.chromosome_list,
-                                                                str(self.junction_sequence_txt.text()),
-                                                                str(self.exclude_sequence_txt.text()),
-                                                                self.blast_db_name,
-                                                                '../../../Gene Count.app/Contents/MacOS/Gene Count',
-                                                                '../../../Junction Make.app/Contents/MacOS/Junction Make'])
+                    self.process.start('GCJM.app/Contents/MacOS/GCJM', arguments)
             else:
                 self.process_finished()
         elif self.clicked_button == self.sender():
@@ -386,11 +396,12 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             self.clicked_button = self.sender()
             self.clicked_button_text = self.clicked_button.text()
             self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
+            arguments = [self.directory, self.gene_list_file]
             if sys.platform == 'win32':
-                self.process.start('Blast Query\Blast Query.exe', [self.directory, self.gene_list_file])
+                self.process.start('Blast Query\Blast Query.exe', arguments)
             elif sys.platform == 'darwin':
-                self.process.start('Blast Query.app/Contents/MacOS/Blast Query', [self.directory,
-                                                                                  self.gene_list_file])
+                self.process.start('Blast Query.app/Contents/MacOS/Blast Query', arguments)
+                # print './Blast Query.app/Contents/MacOS/Blast Query ', " ".join(arguments)
         elif self.clicked_button == self.sender():
             self.process.terminate()
 

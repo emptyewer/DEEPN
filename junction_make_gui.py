@@ -13,7 +13,11 @@ main_directory = sys.argv[1]
 junction_sequence = sys.argv[2]
 exclusion_sequence = sys.argv[3]
 blast_db_name = sys.argv[4]
+gene_list_file = sys.argv[5]
+combined = int(sys.argv[6])
 
+if combined == 1:
+    input_data_folder = 'sam_files'
 
 def initialize_folders(directory):
     fileio.create_new_folder(directory, junction_folder)
@@ -43,4 +47,4 @@ if __name__ == '__main__':
                               junction_sequence, exclusion_sequence)
     # printio.print_comment("Comment3")
     junctionf.blast_search(main_directory, blast_db_name, blast_results_folder)
-    junctionf.generate_tabulated_blast_results(main_directory, blast_results_folder, blast_results_query)
+    junctionf.generate_tabulated_blast_results(main_directory, blast_results_folder, blast_results_query, gene_list_file)

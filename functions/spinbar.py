@@ -26,7 +26,7 @@ class SpinCursor(threading.Thread):
             time.sleep(self.waittime)
 
     def run(self):
-        while (not self.flag):
+        while self.flag != True:
             self.spin()
         self.out.write(" " * (len(self.string) + 1))
         

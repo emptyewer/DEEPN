@@ -80,7 +80,7 @@ class fileio():
     def remove_file(self, directory, folder, file_list):
         for fi in file_list:
             os.remove(os.path.join(directory, folder, fi))
-            sys.stdout.write(">>> Cleaned up file %s in folder %s" % (fi, folder))
+            sys.stdout.write(">>> Cleaned up file %s in folder %s\n" % (fi, folder))
 
     # def input_data_check(self, directory, input_data_folder, file_extenstion, folders=[]):
     #     self.check_path(directory, input_data_folder, 'Cannot find %s folder' % input_data_folder)

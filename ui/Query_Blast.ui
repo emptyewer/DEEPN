@@ -52,33 +52,40 @@
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
-         <pointsize>16</pointsize>
          <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>Select Gene (NM number)</string>
+        <string>Select Gene and Accession Number</string>
        </property>
       </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QLineEdit" name="accession_number_search">
-         <property name="font">
-          <font>
-           <pointsize>17</pointsize>
-          </font>
+        <widget class="QLineEdit" name="search_bar">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>500</width>
+           <height>16777215</height>
+          </size>
          </property>
         </widget>
        </item>
        <item>
+        <widget class="QComboBox" name="accession_list"/>
+       </item>
+       <item>
         <widget class="QPushButton" name="save_btn">
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>16777215</height>
+          </size>
          </property>
          <property name="text">
           <string>Save to CSV</string>
@@ -95,7 +102,6 @@
           <widget class="QLabel" name="label1_1">
            <property name="font">
             <font>
-             <pointsize>16</pointsize>
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -109,13 +115,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="blast_dataset_ddl_1">
-           <property name="font">
-            <font>
-             <pointsize>17</pointsize>
-            </font>
-           </property>
-          </widget>
+          <widget class="QComboBox" name="blast_dataset_ddl_1"/>
          </item>
          <item>
           <widget class="Line" name="line">
@@ -306,7 +306,6 @@
           <widget class="QLabel" name="label2_1">
            <property name="font">
             <font>
-             <pointsize>16</pointsize>
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -320,13 +319,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="blast_dataset_ddl_2">
-           <property name="font">
-            <font>
-             <pointsize>17</pointsize>
-            </font>
-           </property>
-          </widget>
+          <widget class="QComboBox" name="blast_dataset_ddl_2"/>
          </item>
          <item>
           <widget class="Line" name="line_2">
@@ -490,7 +483,6 @@
           <widget class="QLabel" name="label3_1">
            <property name="font">
             <font>
-             <pointsize>16</pointsize>
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -504,13 +496,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="blast_dataset_ddl_3">
-           <property name="font">
-            <font>
-             <pointsize>17</pointsize>
-            </font>
-           </property>
-          </widget>
+          <widget class="QComboBox" name="blast_dataset_ddl_3"/>
          </item>
          <item>
           <widget class="Line" name="line_3">

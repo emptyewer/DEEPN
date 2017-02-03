@@ -1,31 +1,29 @@
 import os
-import re
 import sys
 import time
 import struct
 import cPickle
 import subprocess
+from PyQt4 import QtCore
 from sys import platform as _platform
+from collections import Counter
 
 import libraries.joblib.parallel as Parallel
 import functions.process as process
 import functions.spinbar as spinbar
+import functions.structures as sts
 
 def timeit(method):
     def timed(*args, **kw):
         ts = time.time()
         result = method(*args, **kw)
         te = time.time()
-        print '>>> Function %r finished %2.2f sec' % (method.__name__, te-ts)
+        print '>>> Function %r finished %2.2f sec' % (method.__name__.upper().replace("_", " "), te-ts)
         sys.stdout.flush()
         return result
     return timed
 
 class junctionf():
-    """
-
-    """
-
     def __init__(self, f, p):
         self.fileio = f
         self.printio = p
@@ -70,11 +68,9 @@ class junctionf():
 
         for f in unmapped_sam_files:
             input_file = open(os.path.join(directory, input_data_folder, f), 'r')
-            output_file = open(os.path.join(directory, junction_folder, f + '_jTEMP'), 'w')
+            output_file = open(os.path.join(directory, junction_folder, f.replace(".sam", '.junctions.txt')), 'w')
             self._search_for_HA(input_file, junct1, junct2, junct3, exclusion_sequence, output_file, f)
             output_file.close()
-        
-        self.fileio.change_file_name(directory, junction_folder, ".sam_jTEMP", ".Junctions.txt")
         self._multi_convert(directory, junction_folder, blast_results_folder)
 
     @timeit
@@ -103,7 +99,7 @@ class junctionf():
         print ">>> Selected Blast DB: %s" % db_name
         sys.stdout.flush()
         for file_name in self.fileio.get_file_list(directory, blast_results_folder, ".fa"):
-            output_file = os.path.join(directory, blast_results_folder, file_name + '.blast.txt')
+            output_file = os.path.join(directory, blast_results_folder, file_name.replace(".junctions.fa", '.blast.txt'))
             blast_command_list = [os.path.join(blast_path, 'blastn' + suffix),
                                   '-query', os.path.join(directory, 'blast_results', file_name), '-db', db_path,
                                   '-task',  'blastn', '-dust', 'no', '-num_threads', str(Parallel.cpu_count()),
@@ -119,18 +115,34 @@ class junctionf():
             self._spin.stop()
 
     @timeit
-    def generate_tabulated_blast_results(self, directory, blast_results_folder, blast_results_query_folder):
+    def generate_tabulated_blast_results(self, directory, blast_results_folder, blast_results_query_folder, gene_list_file):
         blasttxtList = self.fileio.get_file_list(directory, blast_results_folder, ".txt")
         for blasttxt in blasttxtList:
-            self._spin = spinbar.SpinCursor(msg="Parsing BLAST results file %s ..." % blasttxt)
-            self._spin.start()
-            blast_dict = self._blast_parser(directory, blast_results_folder, blasttxt)
-            dotPfile = open(os.path.join(directory, blast_results_query_folder, blasttxt + ".p"), "wb")
-            cPickle.dump(blast_dict, dotPfile)
-            self._spin.stop()
-        self.fileio.change_file_name(directory, blast_results_query_folder, ".Junctions.txtTEMP.fa.blast.txt.p",
-                                     ".blast.txt.p")
-        self.fileio.change_file_name(directory, blast_results_folder, ".Junctions.txtTEMP.fa.blast.txt", ".blast.txt")
+            print ">>> Parsing BLAST results file %s ..." % blasttxt
+            blast_dict, accession_dict, gene_dict = self._blast_parser(directory, blast_results_folder,
+                                                                       blasttxt, gene_list_file)
+            for key in blast_dict.keys():
+                if key not in ['total', 'pos_que']:
+                    stats = {'in_orf'  : 0, 'in_frame': 0, 'downstream': 0,
+                             'upstream': 0, 'not_in_frame': 0,
+                             'intron'  : 0, 'backwards': 0, 'not_in_orf': 0, 'total': 0
+                             }
+                    for nm in blast_dict[key].keys():
+                        for j in blast_dict[key][nm]:
+                            j.ppm = blast_dict['pos_que'][j.pos_que] * 1000000 / blast_dict['total']
+                            stats[j.frame] += 1
+                            stats[j.orf] += 1
+                            stats['total'] += 1
+                        blast_dict[key][nm] = list(set(blast_dict[key][nm]))
+                    blast_dict[key]['stats'] = stats
+
+            blast_dict.pop('pos_que')
+            blast_query_p = open(os.path.join(directory, blast_results_query_folder,
+                                              blasttxt.replace(".blast.txt", ".bqp")), "wb")
+            lists_p = open(os.path.join(directory, blast_results_query_folder,
+                                              blasttxt.replace(".blast.txt", ".bqa")), "wb")
+            cPickle.dump(blast_dict, blast_query_p)
+            cPickle.dump([accession_dict, gene_dict], lists_p)
         self.fileio.remove_file(directory, blast_results_folder,
                                 self.fileio.get_file_list(directory, blast_results_folder, ".fa"))
 
@@ -138,7 +150,8 @@ class junctionf():
         fileList = self.fileio.get_file_list(directory, infolder, ".txt")
         print ' '
         for f in fileList:
-            self.fileio.make_FASTA(os.path.join(directory, infolder, f), os.path.join(directory, outfolder, f + "TEMP.fa"))
+            self.fileio.make_FASTA(os.path.join(directory, infolder, f),
+                                   os.path.join(directory, outfolder, f[:-4] + ".fa"))
         return
     
     def _search_for_HA(self, infile, primaryJunct, secondaryJunct, tertiaryJunct, exclusion_sequence, OutFile, f):
@@ -161,7 +174,7 @@ class junctionf():
             if splitLine[0][0] != '@':
                 reads += 1
                 iterations += 1
-                if iterations == 25000:
+                if iterations == 5000:
                     iterations = 0
                     sys.stdout.write('\b.',)
                     sys.stdout.flush()
@@ -230,42 +243,91 @@ class junctionf():
         z = HAseq[27:42] 
         return[x, y, z]
 
-    def _blast_parser(self, directory, infolder, fileName):
-        I = open(os.path.join(directory, infolder, fileName), 'r')
-        counter = 0
-        total = 0
-        total2 = 0
-        variable = 0
-        Dict = {}
-        toggle = 'n'
-        for line in I.readlines():
+    def _get_accession_number_list(self, gene_list_file):
+        fh = open(os.path.join('lists', gene_list_file), 'r')
+        gene_list = {}
+        for line in fh.readlines():
+            split = line.split()
+            gene_list[split[0]] = {'gene_name' : split[1],
+                                   'orf_start' : int(split[6]) + 1,
+                                   'orf_stop'  : int(split[7]),
+                                   'mRNA'      : split[9],
+                                   'intron'    : split[8],
+                                   'chromosome': split[2]
+                                   }
+        return gene_list
+
+    def _blast_parser(self, directory, infolder, fileName, gene_list_file):
+        blast_results_handle = open(os.path.join(directory, infolder, fileName), 'r')
+        gene_list = self._get_accession_number_list(gene_list_file)
+        blast_results_count = 0
+        print_counter = 0
+        previous_bitscore = 0
+        results_dictionary = {}
+        accession_dict = {}
+        gene_dict = {}
+        collect_results = 'n'
+        pos_que = []
+        for line in blast_results_handle.readlines():
             line.strip()
             split = line.split()
             if "BLASTN" in line:
-                total += 1
-                total2 += 1
-                variable = 0
-                if total2 == 90000:
-                        sys.stdout.write('.')
-                        total2 = 0
-            elif "hits" in line and int(split[1]) < 100:  # limits number of blast returns for single read
-                    toggle = 'y'
-
-            elif line[0] != '#' and toggle == 'y' and float(split[2]) > 98 and float(split[11]) > 50.0 and float(split[11]) > variable:
-                variable = float(split[11])*0.98
-                counter += 1
-
-                if (int(split[9]) - int(split[8])) < 0:
-                    junctIndex = split[8] + '-1000'
+                blast_results_count += 1
+                print_counter += 1
+                previous_bitscore = 0
+                if print_counter == 90000: #this if loop is purely for output purposes
+                    sys.stdout.write('.')
+                    print_counter = 0
+            elif "hits" in line and int(split[1]) < 100:  # limits number of blast hits for single read to less than 100
+                collect_results = 'y'
+            elif split[0] != '#' and collect_results == 'y' and float(split[2]) > 98 and \
+                            float(split[11]) > 50.0 and float(split[11]) > previous_bitscore:
+                previous_bitscore = float(split[11]) * 0.98
+                nm_number = split[1]
+                gene_name = gene_list[nm_number]['gene_name']
+                accession_dict[nm_number] = gene_list[nm_number]['gene_name']
+                if gene_name not in gene_dict.keys():
+                    gene_dict[gene_name] = [nm_number]
                 else:
-                    junctIndex = split[8] + '-' + split[6]
+                    gene_dict[gene_name].append(nm_number)
 
-                if split[1] not in Dict.keys():
-                    Dict[split[1]] = [junctIndex]
+                pq = nm_number + "-" + split[8] + "-" + split[6]
+                j = sts.jcnt()
+                j.position = int(split[8])
+                j.query_start = int(split[6])
+                j.pos_que = pq
+                pos_que.append(pq)
+                fudge_factor = j.query_start - 1
+                frame = j.position - gene_list[nm_number]['orf_start'] - fudge_factor
+                if frame % 3 == 0 or frame == 0:
+                    j.frame = "in_frame"
+                elif int(split[9]) - j.position < 0:
+                    j.frame = "backwards"
+                elif gene_list[nm_number]['intron'] == "INTRON":
+                    j.frame = "intron"
                 else:
-                    Dict[split[1]].append(junctIndex)
+                    j.frame = "not_in_frame"
+
+                if j.position < gene_list[nm_number]['orf_start']:
+                    j.orf = "upstream"
+                elif j.position > gene_list[nm_number]['orf_stop']:
+                    j.orf = "downstream"
+                elif j.position >= gene_list[nm_number]['orf_start'] and j.position <= gene_list[nm_number]['orf_stop']:
+                    j.orf = "in_orf"
+                else:
+                    j.orf = "not_in_orf"
+
+                if gene_name not in results_dictionary.keys():
+                    results_dictionary[gene_name] = {}
+                    results_dictionary[gene_name][nm_number] = [j]
+                else:
+                    if nm_number not in results_dictionary[gene_name].keys():
+                        results_dictionary[gene_name][nm_number] = [j]
+                    else:
+                        results_dictionary[gene_name][nm_number].append(j)
             else:
-                toggle = 'n'
-        Dict['total'] = total 
-        I.close()
-        return Dict
+                collect_results = 'n'
+        results_dictionary['total'] = blast_results_count
+        results_dictionary['pos_que'] = Counter(pos_que)
+        blast_results_handle.close()
+        return results_dictionary, accession_dict, gene_dict

@@ -17,9 +17,14 @@ summary_folder = "gene_count_summary"
 # Creates the folder that will hold more granualar data on exon counts per chromosome
 chromosomes_folder = "chromosome_files"
 
+
 main_directory = sys.argv[1]
 gene_dictionary = sys.argv[2]
 chromosomes_list_name = sys.argv[3]
+combined = int(sys.argv[4])
+
+if combined == 1:
+    input_folder = 'sam_files'
 
 def timeit(method):
     def timed(*args, **kw):
@@ -34,6 +39,7 @@ def timeit(method):
 def get_dictionary(fileName):
     dictionary = pickle.load(open(fileName, 'rb'))
     return dictionary
+
 
 def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
     totalReads = 0
@@ -137,6 +143,7 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     sys.stdout.write(">>> %d Total Reads (%s)" % (totalReads, filename))
     sys.stdout.flush()
     totalReads2 = 0
+    exon_index = 0
     for chrom in chromosomes_list:
         if chrom in exonDict.keys():
             readList = sorted(readDict[chrom])
@@ -144,12 +151,13 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
             for read in readList:
                 if len(exonList) > 0 and read < exonList[0][0]:
                     continue
-                for exon in exonList:
+                for exon in exonList[exon_index:]:
                     if read >= exon[0] and read <= exon[1]:
                         exonDict[chrom][exon] += 1
                         totalReads2 += 1
                     elif read > exon[1]:
-                        exonList.remove(exon)
+                        exon_index += 1
+                        # exonList.remove(exon)
             sys.stdout.write('>>> Finished Chromosome %s%s for File (%s)' % (chrom[:20], '' if len(chrom) <= 20 else '...',
                                                                              filename))
             sys.stdout.flush()

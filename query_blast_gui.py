@@ -1,6 +1,9 @@
 import os
+import re
 import sys
+import time
 from time import localtime, strftime
+import thread
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui, uic
 from collections import OrderedDict
@@ -9,6 +12,8 @@ import libraries.xlsxwriter as xls
 
 import functions.fileio_gui as f
 import functions.plot as plot
+import functions.structures as strt
+import subprocess
 
 app = QtGui.QApplication(sys.argv)
 ui_path = os.path.join('ui', 'Query_Blast.ui')
@@ -17,7 +22,7 @@ if sys.platform == 'win32':
 form_class, base_class = uic.loadUiType(ui_path)
 
 main_directory = sys.argv[1]
-gene_list_file = sys.argv[2]
+list_name = sys.argv[2]
 
 class QCustomTableWidgetItemInt(QtGui.QTableWidgetItem):
     def __init__(self, value):
@@ -44,25 +49,25 @@ class QCustomTableWidgetItemFloat(QtGui.QTableWidgetItem):
             return QtGui.QTableWidgetItem.__lt__(self, other)
 
 class Query_Blast_Gui(QtGui.QMainWindow, form_class):
-    def __init__(self, folder, directory, gene_list_file, *args):
+    def __init__(self, folder, directory, list_file, *args):
         super(Query_Blast_Gui, self).__init__(*args)
         self.setupUi(self)
+        self.clipboard = ""
         self.input_folder = folder
         self.directory = directory
-        self.gene_list_file = gene_list_file
-
+        self.list_file = list_file
+        self.updating = False
         self.fileio = f.fileio()
         # Selections from GUI
-        self.selected_accession_number_name = ''
+        self.selected_gene_name = ''
+        self.selected_accession_number = ''
         self.selected_dataset_names = ['-- Select --', '-- Select --', '-- Select --']
         # Generic Table Names
         self.table = None
         self.table_filtered = None
         # Cache for storing data
-        self.selected_gene = {}
-        self.gene_information = OrderedDict()
+        self.gene_info_list = OrderedDict()
         self.datasets_cache = OrderedDict()
-        self.accession_numbers_list = QtCore.QStringList()
         # Methods
         self._initialize_ui_elements()
         # Results Store
@@ -81,15 +86,124 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
         self.tabWidget_3.addTab(self.graph3, "Plot")
         self.graph3.initialize_plot()
 
+    def monitor_clipboard(self):
+        while 1:
+            self.clipboard = str(subprocess.check_output('pbpaste'))
+            self.clipboard = self.clipboard.rstrip().lstrip()
+            if self.clipboard in self.gene_info_list.keys():
+                if str(self.search_bar.text()).rstrip().lstrip() != self.clipboard:
+                    print "Updating Results for Gene... ", self.clipboard
+                    sys.stdout.flush()
+                    self.search_bar.setText(self.clipboard)
+                    self.old_clipboard = self.clipboard
+                    self.search_bar.editingFinished.emit()
+            # else:
+            #     self.search_bar.setText("Copy a valid accession number or gene name to the clipboard")
+            time.sleep(0.5)
 
-    def populate_accession_suggestions(self):
-        self.accession_numbers_list.removeDuplicates()
-        self.completer = QtGui.QCompleter(self.accession_numbers_list, self)
+    def _initialize_ui_elements(self):
+        self.gene_info_list, self.accession_numbers_list = self.get_indexes()
+        self.get_sequences()
+        self.populate_gene_suggestions()
+        self.blast_dataset_ddl_1.addItem('-- Select --')
+        self.blast_dataset_ddl_2.addItem('-- Select --')
+        self.blast_dataset_ddl_3.addItem('-- Select --')
+        for fi in self.fileio.get_file_list(self.directory, self.input_folder, '.bqp'):
+            self.blast_dataset_ddl_1.addItem(fi)
+            self.blast_dataset_ddl_2.addItem(fi)
+            self.blast_dataset_ddl_3.addItem(fi)
+        self.blast_dataset_ddl_1.currentIndexChanged.connect(self._dataset_selected)
+        self.blast_dataset_ddl_2.currentIndexChanged.connect(self._dataset_selected)
+        self.blast_dataset_ddl_3.currentIndexChanged.connect(self._dataset_selected)
+        self.disable_ui_elements()
+
+    def populate_gene_suggestions(self):
+        thread.start_new_thread(self.monitor_clipboard, ())
+        # self.accession_numbers_list.removeDuplicates()
+        self.completer = QtGui.QCompleter(self.accession_numbers_list.keys() + self.gene_info_list.keys(), self)
         self.completer.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self.accession_number_search.setCompleter(self.completer)
-        self.accession_number_search.setText("NM_")
-        self.accession_number_search.textChanged.connect(self._accession_number_search_changed)
+        self.search_bar.setCompleter(self.completer)
+        # self.search_bar.setText("NM_")
+        self.search_bar.editingFinished.connect(self.search_changed)
+        self.accession_list.currentIndexChanged.connect(self.accession_changed)
+
+    def search_changed(self):
+        self.accession_list.clear()
+        self.search_text = str(self.search_bar.text()).rstrip().lstrip()
+        if self.search_text in self.gene_info_list.keys():
+            self.selected_gene_name = self.search_text
+            items = [self.accession_list.itemText(i) for i in range(self.accession_list.count())]
+            for accession in set(self.gene_info_list[self.selected_gene_name][0]):
+                if accession not in items:
+                    self.accession_list.addItem(accession)
+            self.accession_list.setCurrentIndex(0)
+            self.enable_ui_elements()
+        elif self.search_text in self.accession_numbers_list.keys():
+            self.selected_gene_name = self.accession_numbers_list[self.search_text]
+            for accession in set(self.gene_info_list[self.selected_gene_name][0]):
+                self.accession_list.addItem(accession)
+            self.search_bar.setText(self.selected_gene_name)
+            self.accession_list.setCurrentIndex(0)
+            self.enable_ui_elements()
+        else:
+            self.disable_ui_elements()
+            self.status_bar.showMessage("Gene Not Found!", 5000)
+            self.sequence_browser.clear()
+            self.graph1.clear_plot()
+            self.graph2.clear_plot()
+            self.graph3.clear_plot()
+            if self.table:
+                self.table.clearContents()
+                self.table.setRowCount(0)
+
+            if self.table_filtered:
+                self.table_filtered.clearContents()
+                self.table_filtered.setRowCount(0)
+
+            # for i in range(5):
+            #     self.table.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
+            #     self.table_filtered.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
+
+        # try:
+        #     self.selected_gene = self.gene_information[str(self.selected_gene_name)]
+        #     _sequence = self.sequence_format_html(self.selected_gene)
+        #     self.sequence_browser.setHtml(QtCore.QString(_sequence))
+        # except KeyError:
+        #     self.selected_gene = {}
+        #     pass
+        #
+        if self.selected_gene_name != '' and str(self.accession_list.currentText()) != '':
+            self._dataset_selected()
+            _seq = self.sequence_format_html(self.sequences_info_list[str(self.accession_list.currentText())])
+            self.sequence_browser.setHtml(QtCore.QString(_seq))
+
+    def disable_ui_elements(self):
+        self.sequence_browser.setEnabled(False)
+        self.blast_dataset_ddl_1.setEnabled(False)
+        self.blast_dataset_ddl_2.setEnabled(False)
+        self.blast_dataset_ddl_3.setEnabled(False)
+        self.tabWidget_1.setEnabled(False)
+        self.tabWidget_2.setEnabled(False)
+        self.tabWidget_3.setEnabled(False)
+
+    def enable_ui_elements(self):
+        self.sequence_browser.setEnabled(True)
+        self.blast_dataset_ddl_1.setEnabled(True)
+        self.blast_dataset_ddl_2.setEnabled(True)
+        self.blast_dataset_ddl_3.setEnabled(True)
+        self.tabWidget_1.setEnabled(True)
+        self.tabWidget_2.setEnabled(True)
+        self.tabWidget_3.setEnabled(True)
+
+    def accession_changed(self):
+        if self.selected_gene_name != '' and str(self.accession_list.currentText()) != '':
+            self.selected_accession_number = str(self.accession_list.currentText())
+            if self.selected_accession_number != '':
+                _seq = self.sequence_format_html(self.sequences_info_list[self.selected_accession_number])
+                self.sequence_browser.setHtml(QtCore.QString(_seq))
+            self._dataset_selected()
+
 
     def sequence_format_html(self, selected_gene):
         sequence = selected_gene['mRNA']
@@ -105,58 +219,34 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
         html_string += '</body></html>'
         return html_string
 
-    def get_accession_number_list(self, directory, gene_list_file):
-        fh = open(os.path.join('lists', gene_list_file), 'r')
-        gene_list = {}
-        accession_list = QtCore.QStringList()
-        for line in fh.readlines():
-            split = line.split()
-            gene_list[split[0]] = {'nm_number': split[0], 'gene_name': split[1], 'orf_start': int(split[6])+1, 'orf_stop': int(split[7]), 'mRNA': split[9], 'intron': split[8], 'chromosome': split[2]}
-            accession_list.append(QtCore.QString(split[0]))
+    def get_indexes(self):
+        gene_list = OrderedDict()
+        accession_list = OrderedDict()
+        for file_name in self.fileio.get_file_list(self.directory, input_folder, '.bqa'):
+            data = cPickle.load(open(os.path.join(self.directory, input_folder, file_name), 'rb'))
+            for k, e in data[0].items() + accession_list.items():
+                accession_list[k] = e
+            for l, g in data[1].items() + gene_list.items():
+                gene_list.setdefault(l, []).append(g)
         return gene_list, accession_list
 
-    def make_condensed_list(self, inlist):
-        count = 0
-        roster = set()
-        return_list = []
-        [item for item in inlist if item[0] not in roster and not roster.add(item[0])]
-        for item in roster:
-            for thing in inlist:
-                if thing[0] == item:
-                    count += thing[2]
-            return_list.append((item, count))
-            count = 0
-        return_list.sort()
-        return return_list
-
-    def _accession_number_search_changed(self):
-        self.selected_accession_number_name = str(self.accession_number_search.text())
-        try:
-            self.selected_gene = self.gene_information[str(self.selected_accession_number_name)]
-            _sequence = self.sequence_format_html(self.selected_gene)
-            self.sequence_browser.setHtml(QtCore.QString(_sequence))
-        except KeyError:
-            self.selected_gene = {}
-            pass
-
-        if self.selected_gene != {}:
-            self._dataset_selected()
+    def get_sequences(self):
+        fh = open(os.path.join('lists', self.list_file), 'r')
+        self.sequences_info_list = {}
+        for line in fh.readlines():
+            split = line.split()
+            self.sequences_info_list[split[0]] = {'gene_name' : split[1],
+                                                  'nm_number' : split[0],
+                                                  'orf_start' : int(split[6]) + 1,
+                                                  'orf_stop'  : int(split[7]),
+                                                  'mRNA'      : split[9],
+                                                  'intron'    : split[8],
+                                                  'chromosome': split[2]
+                                                  }
 
 
-    def _initialize_ui_elements(self):
-        self.gene_information, self.accession_numbers_list = self.get_accession_number_list(self.directory,
-                                                                                            self.gene_list_file)
-        self.populate_accession_suggestions()
-        self.blast_dataset_ddl_1.addItem('-- Select --')
-        self.blast_dataset_ddl_2.addItem('-- Select --')
-        self.blast_dataset_ddl_3.addItem('-- Select --')
-        for fi in self.fileio.get_file_list(self.directory, self.input_folder, '.p'):
-            self.blast_dataset_ddl_1.addItem(fi)
-            self.blast_dataset_ddl_2.addItem(fi)
-            self.blast_dataset_ddl_3.addItem(fi)
-        self.blast_dataset_ddl_1.currentIndexChanged.connect(self._dataset_selected)
-        self.blast_dataset_ddl_2.currentIndexChanged.connect(self._dataset_selected)
-        self.blast_dataset_ddl_3.currentIndexChanged.connect(self._dataset_selected)
+
+
 
     def _initialize_results_store(self):
         self.results = [[], [], []]
@@ -182,11 +272,31 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
             pass
         return index, dataset_name
 
-    def get_filtered_data(self, dataset1, dataset2, table, index, name, filtered_results):
-        freq1 = [(int(position.split('-')[0]), position, dataset1[name].count(position) * 1000000 / float(dataset1['total'])) for position in set(dataset1[name])]
-        freq1B = self.make_condensed_list(freq1)
+    def make_condensed_list(self, inlist): #What does this function do???
+        count = 0
+        roster = set()
+        return_list = []
+        for item in inlist:
+            if item[0] not in roster:
+                roster.add(item[0])
 
-        freq2 = [(int(position.split('-')[0]), position, dataset2[name].count(position) * 1000000 / float(dataset2['total'])) for position in set(dataset2[name])]
+        for item in roster:
+            for thing in inlist:
+                if thing[0] == item:
+                    count += thing[2]
+            return_list.append((item, count))
+            count = 0
+        return_list.sort()
+        return return_list
+
+    def get_filtered_data(self, junctions1, junctions2, table, index, filtered_results):
+        freq1 = []
+        freq2 = []
+        for j1 in junctions1:
+            freq1.append((j1.position, j1.query_start, j1.ppm))
+        freq1B = self.make_condensed_list(freq1)
+        for j2 in junctions2:
+            freq2.append((j2.position, j2.query_start, j2.ppm))
         freq2B = self.make_condensed_list(freq2)
         for item2 in freq2B:
             if item2[0] in [item[0] for item in freq1B]:
@@ -207,8 +317,9 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
         self._initialize_results_store()
 
         if isinstance(self.sender(), QtGui.QComboBox):
-            index, dataset_name = self._get_sender_index_name(self.sender())
-            self.selected_dataset_names[index] = dataset_name
+            if self.sender().objectName() != 'accession_list':
+                index, dataset_name = self._get_sender_index_name(self.sender())
+                self.selected_dataset_names[index] = dataset_name
         else:
             pass
 
@@ -230,66 +341,45 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
                     except AttributeError:
                         pass
 
+                    # try:
+                    self.table.clearContents()
+                    junction_data = dataset[self.selected_gene_name][self.selected_accession_number]
+                    self.table.setSortingEnabled(False)
+                    self.table.setRowCount(len(junction_data))
+                    for row, values in enumerate(junction_data):
+                        j = junction_data[row]
+                        self.table.setItem(row, 0, QCustomTableWidgetItemInt(j.position))
+                        self.table.setItem(row, 1, QCustomTableWidgetItemFloat(round(j.ppm, 3)))
+                        self.table.setItem(row, 2, QCustomTableWidgetItemInt(j.query_start))
+                        self.table.setItem(row, 3, QtGui.QTableWidgetItem(j.orf.replace("_", " ").title()))
+                        self.table.setItem(row, 4, QtGui.QTableWidgetItem(j.frame.replace("_", " ").title()))
+                        data = (str(j.position), str(round(j.ppm, 3)), str(j.query_start), j.orf, j.frame)
+                        self.results[count - 1].append(data)
+                    self.table.setSortingEnabled(True)
+                    self.table.sortItems(1, 1)
+                    self.graph.plot(self.results[count - 1],
+                                    self.sequences_info_list[str(self.accession_list.currentText())]['orf_start'],
+                                    self.sequences_info_list[str(self.accession_list.currentText())]['orf_stop'])
                     try:
-                        self.table.clearContents()
-                        frequency = [(int(position.split('-')[0]), position, dataset[self.selected_accession_number_name].count(position)
-                                      * 1000000 / float(dataset['total'])) for position in set(dataset[self.selected_accession_number_name])]
-                        self.table.setSortingEnabled(False)
-                        self.table.setRowCount(len(frequency))
-                        for row, values in enumerate(sorted(frequency, key=lambda x: x[2], reverse=True)):
-                            frame = 'Not in Frame'
-                            orf = "Not in ORF"
-                            fudge_factor = int(values[1].split('-')[1]) - 1
-                            num = int(values[0]) - int(self.selected_gene['orf_start']) - fudge_factor
-                            if num % 3 == 0 or num == 0:
-                                frame = 'In Frame'
-                            if self.selected_gene['intron']== 'INTRON':
-                                frame = 'Intron'
-                            if int(values[0]) < int(self.selected_gene['orf_start']):
-                                orf = 'Upstream'
-                            if int(values[0]) > int(self.selected_gene['orf_stop']):
-                                orf = 'Downstream'
-                            if int(values[0]) >= int(self.selected_gene['orf_start']) and int(values[0]) <= int(self.selected_gene['orf_stop']):
-                                orf = "In ORF"
-                            if int(values[1].rsplit('-', 1)[1]) == 1000:
-                                frame = "Backwards"
-
-                            self.table.setItem(row, 0, QCustomTableWidgetItemInt(values[0]))
-                            self.table.setItem(row, 1, QCustomTableWidgetItemFloat(round(values[2], 3)))
-                            self.table.setItem(row, 2, QCustomTableWidgetItemInt(fudge_factor + 1))
-                            self.table.setItem(row, 3, QtGui.QTableWidgetItem(orf))
-                            self.table.setItem(row, 4, QtGui.QTableWidgetItem(frame))
-                            data = (str(values[0]), str(round(values[2], 3)), str(fudge_factor + 1), orf, frame)
-                            self.results[count - 1].append(data)
-                        self.table.setSortingEnabled(True)
-                        self.table.sortItems(1, 1)
-                        self.graph.plot(self.results[count - 1], self.selected_gene['orf_start'], self.selected_gene['orf_stop'])
-                        try:
-                            self.get_filtered_data(self.datasets_cache[self.selected_dataset_names[0]], dataset,
-                                                      self.table_filtered, count - 1, self.selected_accession_number_name,
-                                                      self.filtered_results)
-                        except KeyError:
-                            pass
-
+                        junction_data1 = self.datasets_cache[self.selected_dataset_names[0]][self.selected_gene_name][self.selected_accession_number]
+                        junction_data2 = dataset[self.selected_gene_name][self.selected_accession_number]
+                        self.get_filtered_data(junction_data1, junction_data2,
+                                               self.table_filtered, count - 1,
+                                               self.filtered_results)
                     except KeyError:
-                        self.status_bar.showMessage("Gene Not Found!", 5000)
-                        self.graph.clear_plot()
-                        self.table.clearContents()
-                        self.table_filtered.clearContents()
-                        self.table.setRowCount(1)
-                        self.table_filtered.setRowCount(1)
-                        for i in range(5):
-                            self.table.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
-                            self.table_filtered.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
+                        pass
+
+                    # except KeyError:
+                    #     pass
                     count += 1
 
     @QtCore.pyqtSlot()
     def on_save_btn_clicked(self):
-        self.save_query_results(self.results, self.filtered_results, self.selected_accession_number_name,
+        self.save_query_results(self.results, self.filtered_results, self.selected_gene_name,
                                 self.selected_dataset_names, self.directory)
         self.status_bar.showMessage("Saved to file %s" % os.path.join('query_results', '%s_%s.xlsx' %
-                                    (self.selected_accession_number_name, strftime("%Y-%m-%d_%Hh%Mm%Ss",
-                                                                                   localtime()))),
+                                    (self.selected_gene_name, strftime("%Y-%m-%d_%Hh%Mm%Ss",
+                                                                       localtime()))),
                                     5000)
 
     def save_query_results(self, results, filtered_results, file_name, dataset_names, directory, path='query_results'):
@@ -314,7 +404,7 @@ def appExit():
 
 if __name__ == '__main__':
     input_folder = 'blast_results_query'
-    form = Query_Blast_Gui(input_folder, main_directory, gene_list_file)
+    form = Query_Blast_Gui(input_folder, main_directory, list_name)
     form.show()
     app.aboutToQuit.connect(appExit)
     app.exec_()

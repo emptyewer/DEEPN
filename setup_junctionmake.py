@@ -41,20 +41,20 @@ OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon3.icns',
            'plist': {'CFBundleGetInfoString': 'Junction Make',
                      'CFBundleIdentifier': 'edu.uiowa.robertpiper.deepn.junction_make',
-                     'CFBundleShortVersionString': '1.1',
+                     'CFBundleShortVersionString': '1.5',
                      'CFBundleName': 'Junction Make',
-                     'CFBundleVersion': '11',
+                     'CFBundleVersion': '15',
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
            }
-DATA_FILES_OSX = find_data_files(['functions', 'ui', 'libraries/joblib', 'ncbi_blast/bin/osx/x64', 'ncbi_blast/db', '.'],
-                                 ['functions', 'ui', 'libraries/joblib', 'ncbi_blast/bin/osx/x64', 'ncbi_blast/db', ''],
-                                 ['*.py', '*.ui', '*.py', '*', '*', '*.txt'])
+DATA_FILES_OSX = find_data_files(['functions', 'ui', 'libraries/joblib', 'ncbi_blast/bin/osx/x64', 'ncbi_blast/db', '.', 'lists'],
+                                 ['functions', 'ui', 'libraries/joblib', 'ncbi_blast/bin/osx/x64', 'ncbi_blast/db', '', 'lists'],
+                                 ['*.py', '*.ui', '*.py', '*', '*', '*.txt', '*.prn'])
 
-DATA_FILES_WIN = find_data_files(['functions', 'ui', 'ui/Windows', 'libraries/joblib', 'ncbi_blast/bin/windows/x64', 'ncbi_blast/bin/windows/x32', 'ncbi_blast/db', '.'],
-                                 ['functions', 'ui', 'ui/Windows', 'libraries/joblib', 'ncbi_blast/bin/windows/x64', 'ncbi_blast/bin/windows/x32', 'ncbi_blast/db', ''],
-                                 ['*.py', '*.ui', '*.ui', '*.py', '*', '*', '*', '*.txt'])
+DATA_FILES_WIN = find_data_files(['functions', 'ui', 'ui/Windows', 'libraries/joblib', 'ncbi_blast/bin/windows/x64', 'ncbi_blast/bin/windows/x32', 'ncbi_blast/db', '.', 'lists'],
+                                 ['functions', 'ui', 'ui/Windows', 'libraries/joblib', 'ncbi_blast/bin/windows/x64', 'ncbi_blast/bin/windows/x32', 'ncbi_blast/db', '', 'lists'],
+                                 ['*.py', '*.ui', '*.ui', '*.py', '*', '*', '*', '*.txt', '*.prn'])
 if sys.platform == 'darwin':
     setup(
         app=APP,
@@ -73,7 +73,7 @@ elif sys.platform == 'win32':
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
         console=APP,
-        version='1.1',
+        version='1.5',
         description='Junction Make',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         # windows=[{"script":'junction_make_gui.py',
