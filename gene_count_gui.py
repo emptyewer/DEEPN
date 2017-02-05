@@ -84,7 +84,7 @@ def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
     return readDict, totalReads
 
 
-def remove_directory(directory, folder, suffix):
+def remove_directory(directory, folder):
     path = os.path.join(directory, folder)
     os.system("rm -rf " + path)
 
@@ -167,7 +167,6 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     sys.stdout.write('>>> Creating files and cleaning up... ( %s )' % filename)
     sys.stdout.flush()
     write_all_to_file(directory, exonDict, totalReads, totalReads2, filename, summary_folder, chromosomes_folder)
-    remove_directory(directory, 'gene_count_indices')
 
 @timeit
 def gene_count(directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, sam_file_list):
@@ -209,3 +208,4 @@ if __name__ == '__main__':
     chromosomes_list = fileio.get_chromosomes_list(main_directory, chromosomes_list_name, printio)
     if len(sam_file_list) > 0:
         gene_count(main_directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, sam_file_list)
+    remove_directory(main_directory, 'gene_count_indices')

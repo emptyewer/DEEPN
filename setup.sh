@@ -10,7 +10,7 @@ python setup_junctionmake.py py2app --includes sip --packages PyQt4
 python setup_gcjm.py py2app --includes sip --packages PyQt4
 python setup_queryblast.py py2app --includes sip --packages PyQt4
 python setup_readdepth.py py2app --includes sip --packages PyQt4
-python setup_statistics.py py2app --includes sip --packages PyQt4
+#python setup_statistics.py py2app --includes sip --packages PyQt4
 mv dist/Gene\ Count.app dist/DEEPN.app/Contents/Resources
 mv dist/Junction\ Make.app dist/DEEPN.app/Contents/Resources
 mv dist/GCJM.app dist/DEEPN.app/Contents/Resources
