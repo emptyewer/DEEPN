@@ -33,7 +33,8 @@ def find_data_files(sources, targets, patterns):
                 ret.setdefault(path, []).append(filename)
     return sorted(ret.items())
 
-
+VERSION = os.environ['DEEPN_VERSION']
+BUNDLE_VERSION = VERSION.replace(".", "")
 
 APP = ['stat_maker_gui.py']
 INCLUDES = ['sip', 'PyQt4', 'glob', 'cPickle', 'time', 're', 'os', 'pydoc',
@@ -44,9 +45,9 @@ OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon6.icns',
            'plist': {'CFBundleGetInfoString': 'Stat Maker',
                      'CFBundleIdentifier': 'edu.uiowa.robertpiper.deepn.stat_maker',
-                     'CFBundleShortVersionString': '1.5',
+                     'CFBundleShortVersionString': VERSION,
                      'CFBundleName': 'Stat Maker',
-                     'CFBundleVersion': '15',
+                     'CFBundleVersion': BUNDLE_VERSION,
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'includes': INCLUDES,
            'excludes': EXCLUDES,
@@ -74,7 +75,7 @@ elif sys.platform == 'win32':
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
         console=APP,
-        version='1.5',
+        version=VERSION,
         description='Read Depth',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'stat_maker_gui.py',

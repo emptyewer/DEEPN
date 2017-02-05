@@ -42,6 +42,8 @@ def find_data_files(sources, targets, patterns):
                 ret.setdefault(path, []).append(filename)
     return sorted(ret.items())
 
+VERSION = os.environ['DEEPN_VERSION']
+BUNDLE_VERSION = VERSION.replace(".", "")
 
 APP = ['gene_count_gui.py']
 INCLUDES = ['PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc',
@@ -50,9 +52,9 @@ OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon2.icns',
            'plist': {'CFBundleGetInfoString': 'Gene Count',
                      'CFBundleIdentifier': 'edu.uiowa.robertpiper.deepn.gene_count',
-                     'CFBundleShortVersionString': '1.5',
+                     'CFBundleShortVersionString': VERSION,
                      'CFBundleName': 'Gene Count',
-                     'CFBundleVersion': '15',
+                     'CFBundleVersion': BUNDLE_VERSION,
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
@@ -78,7 +80,7 @@ elif sys.platform == 'win32':
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
         console=APP,
-        version='1.5',
+        version=VERSION,
         description='Gene Count',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         # windows=[{"script":'gene_count_gui.py',

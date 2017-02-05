@@ -33,6 +33,8 @@ def find_data_files(sources, targets, patterns):
                 ret.setdefault(path, []).append(filename)
     return sorted(ret.items())
 
+VERSION = os.environ['DEEPN_VERSION']
+BUNDLE_VERSION = VERSION.replace(".", "")
 
 APP = ['query_blast_gui.py']
 INCLUDES =['PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc',
@@ -41,9 +43,9 @@ OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon4.icns',
            'plist': {'CFBundleGetInfoString': 'Blast Query',
                      'CFBundleIdentifier': 'edu.uiowa.robertpiper.deepn.blast_query',
-                     'CFBundleShortVersionString': '1.5',
+                     'CFBundleShortVersionString': VERSION,
                      'CFBundleName': 'Blast Query',
-                     'CFBundleVersion': '15',
+                     'CFBundleVersion': BUNDLE_VERSION,
                      'NSHumanReadableCopyright': '(c) 2016 Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes'},
            'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript',
@@ -69,7 +71,7 @@ elif sys.platform == 'win32':
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
     setup(
-        version='1.5',
+        version=VERSION,
         description='Query Blast',
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',
         windows=[{"script":'query_blast_gui.py',
