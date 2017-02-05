@@ -185,7 +185,7 @@ class junctionf():
         for line in infile:
             line.strip()
             splitLine = line.split()
-            if splitLine[0][0] != '@':
+            if splitLine[0][0] != '@' and splitLine[2] == '*':
                 reads += 1
                 iterations += 1
                 if iterations == 5000:
@@ -193,7 +193,8 @@ class junctionf():
                     sys.stdout.write('\b.',)
                     sys.stdout.flush()
                           
-                if HA in splitLine[9] or HArev in splitLine[9] or HA2 in splitLine[9] or HA2rev in splitLine[9] or HA3 in splitLine[9] or HA3rev in splitLine[9]:
+                if HA in splitLine[9] or HArev in splitLine[9] or HA2 in splitLine[9] or \
+                   HA2rev in splitLine[9] or HA3 in splitLine[9] or HA3rev in splitLine[9]:
                     Hits += 1
                     if HA in splitLine[9]:
                         HAindex = splitLine[9].index(HA)
