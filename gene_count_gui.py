@@ -26,6 +26,7 @@ combined = int(sys.argv[4])
 if combined == 1:
     input_folder = 'sam_files'
 
+
 def timeit(method):
     def timed(*args, **kw):
         ts = time.time()
@@ -35,6 +36,7 @@ def timeit(method):
         sys.stdout.flush()
         return result
     return timed
+
 
 def get_dictionary(fileName):
     dictionary = pickle.load(open(fileName, 'rb'))
@@ -79,13 +81,13 @@ def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
         binoutfile_names[f].close()
 
     SAMin.close()
-    return (readDict, totalReads)
+    return readDict, totalReads
 
 
-def change_file_name(directory, folder, oldsuffix, newsuffix):
-    var = len(oldsuffix)
-    for filename in glob.iglob(os.path.join(directory, folder, '*' + oldsuffix)):
-        os.rename(filename, filename[:-var] + newsuffix)
+def remove_directory(directory, folder, suffix):
+    path = os.path.join(directory, folder)
+    os.system("rm -rf " + path)
+
 
 def query(chromosome, geneName, Dict, totalReads, output_file, summary_file):
     Ctotal = 0
@@ -109,15 +111,15 @@ def query(chromosome, geneName, Dict, totalReads, output_file, summary_file):
     return Rtotal
 
 
-def allToFile(directory, Dictionary, totalReads, totalReads2, f, sumfolder, chromfolder):
+def write_all_to_file(directory, Dictionary, totalReads, totalReads2, f, sumfolder, chromfolder):
     v = totalReads
     vv = totalReads2
-    summaryFile = open(os.path.join(directory, sumfolder, f + '.summaryTEMP.txt'), 'w')
+    summaryFile = open(os.path.join(directory, sumfolder, f[:-4] + '_summary.csv'), 'w')
     summaryFile.write(str(f)+","+str(f)+","+str(f)+","+str(f))
     summaryFile.write("\n , TotalReads , " + str(v))
     summaryFile.write("\n , TotalReads (PPM), " + str(vv))
     summaryFile.write("\nChromosome , GeneName , PPM , NCBI_Acc")
-    outFile = open(os.path.join(directory, chromfolder, f + '.chromoutputTEMP.txt'), 'w')
+    outFile = open(os.path.join(directory, chromfolder, f[:-4] + '_ChrGene.txt'), 'w')
     for chrom in Dictionary:
         geneList = []
         for exon in Dictionary[chrom]:
@@ -164,9 +166,8 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
             time.sleep(1)
     sys.stdout.write('>>> Creating files and cleaning up... ( %s )' % filename)
     sys.stdout.flush()
-    allToFile(directory, exonDict, totalReads, totalReads2, filename, summary_folder, chromosomes_folder)
-    change_file_name(directory, summary_folder, '.sam.summaryTEMP.txt', '_summary.csv')
-    change_file_name(directory, chromosomes_folder, '.sam.chromoutputTEMP.txt', '_ChrGene.csv')
+    write_all_to_file(directory, exonDict, totalReads, totalReads2, filename, summary_folder, chromosomes_folder)
+    remove_directory(directory, 'gene_count_indices')
 
 @timeit
 def gene_count(directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, sam_file_list):
@@ -198,6 +199,13 @@ if __name__ == '__main__':
     initialize_folders(main_directory)
     # Makes sure proper files are in their place and returns .sam file list
     sam_file_list = fileio.get_sam_filelist(main_directory, input_folder)
+    processed_file_list = fileio.get_file_list(main_directory, summary_folder, ".csv")
+    for processed_file in processed_file_list:
+        for sam_file in sam_file_list:
+            if processed_file.replace("_summary.csv", "") == sam_file[:-4]:
+                sam_file_list.remove(sam_file)
+                break
     # Gets list of chromosomes from Y2Hreadme.txt file
     chromosomes_list = fileio.get_chromosomes_list(main_directory, chromosomes_list_name, printio)
-    gene_count(main_directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, sam_file_list)
+    if len(sam_file_list) > 0:
+        gene_count(main_directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, sam_file_list)

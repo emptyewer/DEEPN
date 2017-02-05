@@ -51,9 +51,17 @@ class junctionf():
         infile.close()
         return var
 
+    def _get_unprocessed_files(self, list, suffix1, processed_list, suffix2):
+        for processed_file in processed_list:
+            for f in list:
+                if f.replace(suffix1, "") == processed_file.replace(suffix2, ""):
+                    list.remove(f)
+                    break
+        return list
+
     @timeit
-    def junction_search(self, directory, junction_folder, input_data_folder,
-                        blast_results_folder, junction_sequence, exclusion_sequence):
+    def junction_search(self, directory, junction_folder, input_data_folder, blast_results_folder,
+                        blast_results_query, junction_sequence, exclusion_sequence):
         # junction_sequence = self._getjunction(">junctionseq")
         junction_sequence.upper()
         exclusion_sequence.upper()
@@ -62,7 +70,9 @@ class junctionf():
         sys.stdout.flush()
         self.printio.print_progress(0, junct1, junct2, junct3, 4)
         unmapped_sam_files = self.fileio.get_sam_filelist(directory, input_data_folder)
-        
+        processed_file_list = self.fileio.get_file_list(directory, blast_results_query, ".bqa")
+        unmapped_sam_files = self._get_unprocessed_files(unmapped_sam_files, ".sam", processed_file_list, ".bqa")
+
         print '>>> Starting junction search.'
         sys.stdout.flush()
 
@@ -71,7 +81,16 @@ class junctionf():
             output_file = open(os.path.join(directory, junction_folder, f.replace(".sam", '.junctions.txt')), 'w')
             self._search_for_HA(input_file, junct1, junct2, junct3, exclusion_sequence, output_file, f)
             output_file.close()
-        self._multi_convert(directory, junction_folder, blast_results_folder)
+        self._multi_convert(directory, junction_folder, blast_results_folder, blast_results_query)
+
+    def _multi_convert(self, directory, infolder, outfolder, blast_results_query):
+        file_list = self.fileio.get_file_list(directory, infolder, ".txt")
+        processed_file_list = self.fileio.get_file_list(directory, blast_results_query, ".bqa")
+        file_list = self._get_unprocessed_files(file_list, ".junctions.txt", processed_file_list, ".bqa")
+        print ' '
+        for f in file_list:
+            self.fileio.make_FASTA(os.path.join(directory, infolder, f),
+                                   os.path.join(directory, outfolder, f[:-4] + ".fa"))
 
     @timeit
     def blast_search(self, directory, db_name, blast_results_folder):
@@ -116,8 +135,11 @@ class junctionf():
 
     @timeit
     def generate_tabulated_blast_results(self, directory, blast_results_folder, blast_results_query_folder, gene_list_file):
-        blasttxtList = self.fileio.get_file_list(directory, blast_results_folder, ".txt")
-        for blasttxt in blasttxtList:
+        blast_list = self.fileio.get_file_list(directory, blast_results_folder, ".txt")
+        processed_file_list = self.fileio.get_file_list(directory, blast_results_query_folder, ".bqa")
+        blast_list = self._get_unprocessed_files(blast_list, ".blast.txt",  processed_file_list, ".bqa")
+
+        for blasttxt in blast_list:
             print ">>> Parsing BLAST results file %s ..." % blasttxt
             blast_dict, accession_dict, gene_dict = self._blast_parser(directory, blast_results_folder,
                                                                        blasttxt, gene_list_file)
@@ -145,14 +167,6 @@ class junctionf():
             cPickle.dump([accession_dict, gene_dict], lists_p)
         self.fileio.remove_file(directory, blast_results_folder,
                                 self.fileio.get_file_list(directory, blast_results_folder, ".fa"))
-
-    def _multi_convert(self, directory, infolder, outfolder):
-        fileList = self.fileio.get_file_list(directory, infolder, ".txt")
-        print ' '
-        for f in fileList:
-            self.fileio.make_FASTA(os.path.join(directory, infolder, f),
-                                   os.path.join(directory, outfolder, f[:-4] + ".fa"))
-        return
     
     def _search_for_HA(self, infile, primaryJunct, secondaryJunct, tertiaryJunct, exclusion_sequence, OutFile, f):
         HA = primaryJunct
