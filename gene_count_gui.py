@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-import glob
 import time
 import cPickle as pickle
 import libraries.joblib.parallel as Parallel
@@ -9,7 +8,6 @@ import libraries.joblib.parallel as Parallel
 # Custom Functions
 import functions.fileio_gui as f
 import functions.printio_gui as p
-import functions.spinbar as spinbar
 
 input_folder = 'mapped_sam_files'
 # Creates the folder that will hold the Genecounts summaries
@@ -25,17 +23,6 @@ combined = int(sys.argv[4])
 
 if combined == 1:
     input_folder = 'sam_files'
-
-
-def timeit(method):
-    def timed(*args, **kw):
-        ts = time.time()
-        result = method(*args, **kw)
-        te = time.time()
-        sys.stdout.write('>>> Function %r finished %2.2f sec' % (method.__name__, te-ts))
-        sys.stdout.flush()
-        return result
-    return timed
 
 
 def get_dictionary(fileName):
@@ -97,12 +84,14 @@ def query(chromosome, geneName, Dict, totalReads, output_file, summary_file):
     for exonTuple in Dict[chromosome]:
         if exonTuple[4] == geneName:
             counts = Dict[chromosome][exonTuple]
-            PPM = counts * float(1000000) / totalReads
+            PPM = 0
+            if totalReads > 0:
+                PPM = counts * float(1000000) / totalReads
             RPKM = PPM * float(1000) / (exonTuple[1] - exonTuple[0])
             output_file.write("\n" + str(exonTuple) + " Counts:" + str(counts) + " PPM:" + str(PPM) + " RPKM:" + str(RPKM))
             Ctotal += counts
             Ptotal += PPM
-            length += (exonTuple[1] - exonTuple[0])
+            length += exonTuple[1] - exonTuple[0]
             accession = exonTuple[5]
     Rtotal = Ptotal * float(1000) / length        
     output_file.write("\n" + "TOTALS" + "\n" + "Counts:" + str(Ctotal) + " PPM:" + str(Ptotal) + " RPKM:" + str(Rtotal) + " Length:" + str(length) + "\n")
@@ -131,7 +120,7 @@ def write_all_to_file(directory, Dictionary, totalReads, totalReads2, f, sumfold
 
 
 def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, filename):
-    sys.stdout.write(">>> Started processing file %s" % filename)
+    sys.stdout.write(">>> Started processing file %s\n" % filename)
     sys.stdout.flush()
     exonDict = get_dictionary(os.path.join('dictionaries', gene_dictionary))
     infile = os.path.join(directory, input_folder, filename)
@@ -142,7 +131,7 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     # else:
     #     bin_folder = os.path.join(directory, input_folder, filename[:-4])
     (readDict, totalReads) = make_read_dictionary(infile, chromosomes_list, gene_count_bin_folder, exonDict)
-    sys.stdout.write(">>> %d Total Reads (%s)" % (totalReads, filename))
+    sys.stdout.write(">>> %d Total Reads (%s)\n" % (totalReads, filename))
     sys.stdout.flush()
     totalReads2 = 0
     exon_index = 0
@@ -160,25 +149,20 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
                     elif read > exon[1]:
                         exon_index += 1
                         # exonList.remove(exon)
-            sys.stdout.write('>>> Finished Chromosome %s%s for File (%s)' % (chrom[:20], '' if len(chrom) <= 20 else '...',
+            sys.stdout.write('>>> Finished Chromosome %s%s for File (%s)\n' % (chrom[:20], '' if len(chrom) <= 20 else '...',
                                                                              filename))
             sys.stdout.flush()
             time.sleep(1)
-    sys.stdout.write('>>> Creating files and cleaning up... ( %s )' % filename)
+    sys.stdout.write('>>> Creating files and cleaning up... ( %s )\n' % filename)
     sys.stdout.flush()
     write_all_to_file(directory, exonDict, totalReads, totalReads2, filename, summary_folder, chromosomes_folder)
 
-@timeit
 def gene_count(directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, sam_file_list):
     num_cores = Parallel.cpu_count()
     print ">>> Using %d Processor Cores" % (num_cores - 1)
-    _spin = spinbar.SpinCursor(msg="Processing mapped .sam files ...", speed=2)
-    _spin.start()
     Parallel.Parallel(n_jobs=num_cores-1)(Parallel.delayed(letsCount)(directory, summary_folder, chromosomes_folder,
                                                                       input_folder, chromosomes_list, f) for f in
                                                                       sam_file_list)
-    _spin.stop()
-
 
 def initialize_folders(directory):
     # Creates the folder that will hold the Genecounts summaries

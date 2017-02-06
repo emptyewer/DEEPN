@@ -86,7 +86,7 @@ class printio():
 
     def print_progress(self, infile, x, y, z, a):
         if a == 1:
-            sys.stdout.write('>>> Processing {}:'.format(infile))
+            sys.stdout.write('>>> Processing {}:\n'.format(infile))
             sys.stdout.flush()
         if a == 2:
             sys.stdout.write('>>> Counting. {} sequences with blast hits in file: {}'.format(x, infile))

@@ -1,27 +1,14 @@
 import os
 import sys
-import time
 import struct
 import cPickle
 import subprocess
-from PyQt4 import QtCore
 from sys import platform as _platform
 from collections import Counter
 
 import libraries.joblib.parallel as Parallel
 import functions.process as process
-import functions.spinbar as spinbar
 import functions.structures as sts
-
-def timeit(method):
-    def timed(*args, **kw):
-        ts = time.time()
-        result = method(*args, **kw)
-        te = time.time()
-        print '>>> Function %r finished %2.2f sec' % (method.__name__.upper().replace("_", " "), te-ts)
-        sys.stdout.flush()
-        return result
-    return timed
 
 class junctionf():
     def __init__(self, f, p):
@@ -59,7 +46,6 @@ class junctionf():
                     break
         return list
 
-    @timeit
     def junction_search(self, directory, junction_folder, input_data_folder, blast_results_folder,
                         blast_results_query, junction_sequence, exclusion_sequence):
         # junction_sequence = self._getjunction(">junctionseq")
@@ -92,7 +78,6 @@ class junctionf():
             self.fileio.make_FASTA(os.path.join(directory, infolder, f),
                                    os.path.join(directory, outfolder, f[:-4] + ".fa"))
 
-    @timeit
     def blast_search(self, directory, db_name, blast_results_folder):
         platform_specific_path = 'osx'
         suffix = ''
@@ -126,14 +111,10 @@ class junctionf():
             # blast_command = " ".join(blast_command_list)
             print ">>> Running BLAST search for file: " + file_name
             sys.stdout.flush()
-            self._spin = spinbar.SpinCursor(msg="Please wait for BLAST to finish...", speed=2)
-            self._spin.start()
             # os.system(blast_command)
             self.blast_pipe = subprocess.Popen(blast_command_list, shell=False)
             self.blast_pipe.wait()
-            self._spin.stop()
 
-    @timeit
     def generate_tabulated_blast_results(self, directory, blast_results_folder, blast_results_query_folder, gene_list_file):
         blast_list = self.fileio.get_file_list(directory, blast_results_folder, ".txt")
         processed_file_list = self.fileio.get_file_list(directory, blast_results_query_folder, ".bqa")

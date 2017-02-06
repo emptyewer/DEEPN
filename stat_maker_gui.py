@@ -163,12 +163,15 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
                 subprocess.Popen(['bash install_deepn.sh ' + self.r_path], shell=True)
                 while not self.check_deepn_installed():
                     time.sleep(0.5)
+            else:
+                self.statusbar.showMessage("Updating DEEPN...")
+                subprocess.Popen(['bash update_deepn.sh ' + self.r_path], shell=True)
 
         self.set_interaction_state(True)
         self.run_btn.setEnabled(False)
         self.verify_installation_btn.setEnabled(False)
         self.verify_installation_btn.setText("Installations are Correct")
-        self.statusbar.showMessage("R, JAGS, and DEEPN Installation is Correct")
+        self.statusbar.showMessage("R, JAGS, and DEEPN Installations is Correct")
 
     def which(self, program):
         try:
@@ -308,9 +311,8 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
             self.fileDropped(self.bait2_nonsel_list_2, path, "Bait2_Non-Selected_2")
 
     def write_four_columns_from_csv(self, csv_file):
-
         filehandle = open(csv_file, 'r')
-        outhandle = open(csv_file[:-4] + "_temp.csv", 'w')
+        outhandle = open(csv_file.replace("_summary.csv", "_stats.csv"), 'w')
         count = 0
         for line in filehandle.readlines():
             if count > 3:
@@ -322,9 +324,9 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
 
     def write_r_input(self):
         output = open(os.path.join(self.directory, 'r_input.params'), 'w')
-        for key in self.data.keys():
+        for key in sorted(self.data.keys()):
             self.write_four_columns_from_csv(self.data[key])
-            output.write("%-25s = %s_temp.csv\n" % (key, self.data[key][:-4]))
+            output.write("%-25s = %s\n" % (key, self.data[key].replace("_summary.csv", "_stats.csv")))
         output.write("%-25s = %d\n" % ("Threshold", self.threshold_sbx.value()))
         # output.write("%-25s = %s\n" % ("R Path", self.r_path))
         # output.write("%-25s = %s" % ("JAGS Path", self.jags_path))
