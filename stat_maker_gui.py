@@ -2,8 +2,10 @@ import os
 import re
 import thread
 import glob
+import cPickle
 import time
 import subprocess
+
 from datetime import datetime
 from libraries.pyper import *
 from PyQt4 import QtCore, QtGui, uic
@@ -65,8 +67,6 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         self.r_path = None
         self.started = 0
         self.r = None
-
-        # thread.start_new_thread(self.monitor_files, ())
 
     def dataReady(self, p):
         print str(p.readAllStandardOutput()).strip()
@@ -133,7 +133,6 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
 
     @QtCore.pyqtSlot()
     def on_verify_installation_btn_clicked(self):  #####################   new definition
-
         if not self.get_exec_path('jags'):
             self.verify_installation_btn.setText("Installing JAGS...")
             self.process = subprocess.Popen('open statistics/JAGS.pkg', shell=True)
@@ -231,14 +230,14 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
                                                                QtGui.QFileDialog.ShowDirsOnly))
         self.directory = directory
         try:
-            dirlist = os.listdir(self.directory)
+            dirlist = os.listdir(os.path.join(self.directory, 'gene_count_summary'))
             existing_items = []
             for index in xrange(self.file_list.count()):
                 existing_items.append(str(self.file_list.item(index).text()))
 
             for file in dirlist:
                 if not re.match('^\.', file) and re.match('.+summary\.csv', file) and file not in existing_items:
-                    path = os.path.join(self.directory, file)
+                    path = os.path.join(self.directory, 'gene_count_summary', file)
                     fileInfo = QtCore.QFileInfo(path)
                     iconProvider = QtGui.QFileIconProvider()
                     icon = iconProvider.icon(fileInfo)
@@ -326,7 +325,7 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         output = open(os.path.join(self.directory, 'r_input.params'), 'w')
         for key in sorted(self.data.keys()):
             self.write_four_columns_from_csv(self.data[key])
-            output.write("%-25s = %s\n" % (key, self.data[key].replace("_summary.csv", "_stats.csv")))
+            output.write("%-25s = %s\n" % (key, self.data[key]))
         output.write("%-25s = %d\n" % ("Threshold", self.threshold_sbx.value()))
         # output.write("%-25s = %s\n" % ("R Path", self.r_path))
         # output.write("%-25s = %s" % ("JAGS Path", self.jags_path))
@@ -352,29 +351,68 @@ class Stat_Maker_Gui(QtGui.QMainWindow, form_class):
         self.quit_btn.setEnabled(state)
         self.threshold_sbx.setEnabled(state)
 
+    def _merge_dicts(*dict_args):
+        """
+        Given any number of dicts, shallow copy and merge into a new dict,
+        precedence goes to key value pairs in latter dicts.
+        """
+        result = {}
+        for dictionary in dict_args:
+            result.update(dictionary)
+        return result
+
     def runr(self):
         self.r("analyzeDeepn('" + os.path.join(self.directory, 'r_input.params') + "', outfile='" + \
-               os.path.join(self.directory, 'statmaker_output.csv') + "')")
+               os.path.join(self.directory, 'gene_count_summary', 'statmaker_output.csv') + "')")
         parameters = []
+        stats = {}
+        for key in self.data.keys():
+            filename = os.path.basename(self.data[key].replace("_summary.csv", "") + ".bqp")
+            stats[key] = cPickle.load(open(os.path.join(self.directory, 'blast_results_query', filename), 'rb'))
+
         p = open(os.path.join(self.directory, "r_input.params"))
         for line in p:
             parameters.append(line)
         p.close()
-        s = open(os.path.join(self.directory, "statmaker_output.csv"))
+        s = open(os.path.join(self.directory, 'gene_count_summary', "statmaker_output.csv"))
         for line in s:
-            parameters.append(line)
+            split = line.rstrip().split(",")
+            if split[0] == 'Gene':
+                length = len(split)
+                for key in sorted(self.data.keys()):
+                    split.extend([" ", " ", " ", " ", key, " ", " ", " "])
+                parameters.append(",".join(split))
+                parameters.append(",".join([" "] * (length + 1) + ["inframe_inorf", "upstream", "in_orf",
+                                                                   "downstream", "in_frame", "backwards",
+                                                                   "intron", " "] * len(self.data.keys())))
+            else:
+                for key in sorted(self.data.keys()):
+                    try:
+                        t = stats[key][split[0]]['stats']
+                        split.extend(map(str, [" ", t['frame_orf'] * 100.0/t['total'],
+                                               t['upstream'] * 100.0/t['total'],
+                                               t['in_orf'] * 100.0/t['total'],
+                                               t['downstream'] * 100.0/t['total'],
+                                               t['in_frame'] * 100.0/t['total'],
+                                               t['backwards'] * 100.0 / t['total'],
+                                               t['intron'] * 100.0 / t['total']]))
+                    except KeyError:
+                        split.extend([" "] + ["N/A"] * 7)
+                parameters.append(",".join(split))
+
         s.close()
 
         FORMAT = '%d%b%Y-%H%M%S'
         name = '%s_%s.csv' % ('statmaker_output', datetime.now().strftime(FORMAT))
-        out = open(os.path.join(self.directory, name), 'w')
+        out = open(os.path.join(self.directory, 'gene_count_summary', name), 'w')
         for l in parameters:
             out.write(l)
+            out.write("\n")
         out.close()
 
-        map(os.remove, glob.glob(os.path.join(self.directory, "*_temp.csv")))
+        map(os.remove, glob.glob(os.path.join(self.directory, 'gene_count_summary', "*_stats.csv")))
         map(os.remove, glob.glob(os.path.join(self.directory, "r_input.params")))
-        map(os.remove, glob.glob(os.path.join(self.directory, "statmaker_output.csv")))
+        map(os.remove, glob.glob(os.path.join(self.directory, 'gene_count_summary', "statmaker_output.csv")))
         self.statusbar.showMessage("Saved Results to File: %s" % os.path.join(self.directory, name))
         self.set_interaction_state(True)
 

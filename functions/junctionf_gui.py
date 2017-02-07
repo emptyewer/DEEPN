@@ -78,7 +78,7 @@ class junctionf():
             self.fileio.make_FASTA(os.path.join(directory, infolder, f),
                                    os.path.join(directory, outfolder, f[:-4] + ".fa"))
 
-    def blast_search(self, directory, db_name, blast_results_folder):
+    def blast_search(self, directory, db_name, blast_results_folder, blast_results_query):
         platform_specific_path = 'osx'
         suffix = ''
         if _platform == "linux" or _platform == "linux2":
@@ -102,7 +102,10 @@ class junctionf():
         db_path = os.path.join(blast_db, db_name)
         print ">>> Selected Blast DB: %s" % db_name
         sys.stdout.flush()
-        for file_name in self.fileio.get_file_list(directory, blast_results_folder, ".fa"):
+        file_list = self.fileio.get_file_list(directory, blast_results_folder, ".fa")
+        processed_file_list = self.fileio.get_file_list(directory, blast_results_query, ".bqa")
+        file_list = self._get_unprocessed_files(file_list, ".junctions.txt", processed_file_list, ".bqa")
+        for file_name in file_list:
             output_file = os.path.join(directory, blast_results_folder, file_name.replace(".junctions.fa", '.blast.txt'))
             blast_command_list = [os.path.join(blast_path, 'blastn' + suffix),
                                   '-query', os.path.join(directory, 'blast_results', file_name), '-db', db_path,
@@ -128,15 +131,17 @@ class junctionf():
                 if key not in ['total', 'pos_que']:
                     stats = {'in_orf'  : 0, 'in_frame': 0, 'downstream': 0,
                              'upstream': 0, 'not_in_frame': 0,
-                             'intron'  : 0, 'backwards': 0, 'not_in_orf': 0, 'total': 0
+                             'intron'  : 0, 'backwards': 0, 'frame_orf': 0, 'total': 0
                              }
                     for nm in blast_dict[key].keys():
+                        blast_dict[key][nm] = list(set(blast_dict[key][nm]))
                         for j in blast_dict[key][nm]:
                             j.ppm = blast_dict['pos_que'][j.pos_que] * 1000000 / blast_dict['total']
                             stats[j.frame] += 1
                             stats[j.orf] += 1
+                            if j.frame_orf:
+                                stats["frame_orf"] += 1
                             stats['total'] += 1
-                        blast_dict[key][nm] = list(set(blast_dict[key][nm]))
                     blast_dict[key]['stats'] = stats
 
             blast_dict.pop('pos_que')
@@ -146,6 +151,8 @@ class junctionf():
                                               blasttxt.replace(".blast.txt", ".bqa")), "wb")
             cPickle.dump(blast_dict, blast_query_p)
             cPickle.dump([accession_dict, gene_dict], lists_p)
+            blast_query_p.close()
+            lists_p.close()
         self.fileio.remove_file(directory, blast_results_folder,
                                 self.fileio.get_file_list(directory, blast_results_folder, ".fa"))
     
@@ -297,21 +304,24 @@ class junctionf():
                 frame = j.position - gene_list[nm_number]['orf_start'] - fudge_factor
                 if frame % 3 == 0 or frame == 0:
                     j.frame = "in_frame"
-                elif int(split[9]) - j.position < 0:
-                    j.frame = "backwards"
-                elif gene_list[nm_number]['intron'] == "INTRON":
-                    j.frame = "intron"
                 else:
                     j.frame = "not_in_frame"
+
+                if gene_list[nm_number]['intron'] == "INTRON":
+                    j.frame = "intron"
+
+                if int(split[9]) - j.position < 0:
+                    j.frame = "backwards"
 
                 if j.position < gene_list[nm_number]['orf_start']:
                     j.orf = "upstream"
                 elif j.position > gene_list[nm_number]['orf_stop']:
                     j.orf = "downstream"
-                elif j.position >= gene_list[nm_number]['orf_start'] and j.position <= gene_list[nm_number]['orf_stop']:
-                    j.orf = "in_orf"
                 else:
-                    j.orf = "not_in_orf"
+                    j.orf = "in_orf"
+
+                if j.frame == 'in_frame' and j.orf == 'in_orf':
+                        j.frame_orf = True
 
                 if gene_name not in results_dictionary.keys():
                     results_dictionary[gene_name] = {}

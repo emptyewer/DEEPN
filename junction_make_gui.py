@@ -46,5 +46,5 @@ if __name__ == '__main__':
     junctionf.junction_search(main_directory, junction_folder, input_data_folder, blast_results_folder,
                               blast_results_query, junction_sequence, exclusion_sequence)
     # printio.print_comment("Comment3")
-    junctionf.blast_search(main_directory, blast_db_name, blast_results_folder)
+    junctionf.blast_search(main_directory, blast_db_name, blast_results_folder, blast_results_query)
     junctionf.generate_tabulated_blast_results(main_directory, blast_results_folder, blast_results_query, gene_list_file)

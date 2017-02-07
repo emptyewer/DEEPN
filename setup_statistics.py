@@ -52,9 +52,9 @@ OPTIONS = {'argv_emulation': True,
            'includes': INCLUDES,
            'excludes': EXCLUDES,
            }
-DATA_FILES = find_data_files(['ui', '', 'statistics', 'libraries', ''],
-                             ['ui', 'lib/python2.7', 'statistics', 'libraries', ''],
-                             ['Stat_Maker.ui', 'DragDropListView.py', '*.pkg', '*.py', '*.sh'])
+DATA_FILES = find_data_files(['ui', '', 'statistics', 'libraries', '', 'functions'],
+                             ['ui', 'lib/python2.7', 'statistics', 'libraries', '', 'functions'],
+                             ['Stat_Maker.ui', 'DragDropListView.py', '*.pkg', '*.py', '*.sh', "*.py"])
 
 if sys.platform == 'darwin':
     setup(
