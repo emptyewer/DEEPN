@@ -8,6 +8,7 @@ import subprocess
 
 from datetime import datetime
 from libraries.pyper import *
+import functions.structures as strt
 from PyQt4 import QtCore, QtGui, uic
 
 app = QtGui.QApplication(sys.argv)
