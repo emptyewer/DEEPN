@@ -133,27 +133,17 @@ def lets_count(directory, summary_folder, chromosomes_folder, input_folder, chro
         if chrom in exon_dict.keys():
             read_list = read_dict[chrom]
             exon_dict_list = exon_dict[chrom]
-
-            # Creating KV pairs for AVL tree, start is for beginning of the exon and end is for the last bp of the exon
+            # Creating KV pairs for AVL tree
             kv_start_pairs = []
-            kv_end_pairs = []
             for key in exon_dict_list.keys():
                 kv_start_pairs.append((key[0], key))
-                kv_end_pairs.append((key[1], key))
             tree_start = AVLTree(kv_start_pairs)
-            tree_end = AVLTree(kv_end_pairs)
             for read in read_list:
                 try:
                     item_start = tree_start.floor_item(read)
-                    item_end = tree_end.ceiling_item(read)
                     if item_start[1][0] <= read <= item_start[1][1]:
                         exon_dict[chrom][item_start[1]] += 1
                         total_hits += 1
-                    # Check the end item only if the exons from start_tree and end_tree are different
-                    if item_start[1] != item_end[1]:
-                        if item_end[1][0] <= read <= item_end[1][1]:
-                            exon_dict[chrom][item_start[1]] += 1
-                            total_hits += 1
                 except KeyError:
                     pass
 
