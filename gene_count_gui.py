@@ -4,6 +4,7 @@ import sys
 import time
 import cPickle as pickle
 import libraries.joblib.parallel as Parallel
+from libraries.bintrees import AVLTree
 
 # Custom Functions
 import functions.fileio_gui as f
@@ -30,11 +31,11 @@ def get_dictionary(fileName):
     return dictionary
 
 
-def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
-    totalReads = 0
+def make_read_dictionary(sam_file, chromosomes_list, bin_folder, exon_dict):
+    total_reads = 0
     iterations = 0
-    SAMin = open(SAMfile, 'r')
-    readDict = {}
+    sam_handle = open(sam_file, 'r')
+    read_dict = {}
     binoutfile_names = {}
 
     try:
@@ -44,9 +45,9 @@ def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
         pass
 
     for chrom in chromosomes_list:
-        readDict[chrom] = []
+        read_dict[chrom] = []
 
-    for line in SAMin:
+    for line in sam_handle:
         line.strip()
         split = line.split()
         if line != '\n':
@@ -54,10 +55,10 @@ def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
                 chromosome = split[2][3:]
                 RUmapped = split[2]
                 position = int(split[3])
-                if RUmapped != '*' and chromosome in exonDict.keys():
-                    totalReads += 1
+                if RUmapped != '*' and chromosome in exon_dict.keys():
+                    total_reads += 1
                     iterations += 1
-                    readDict[chromosome].append(position)
+                    read_dict[chromosome].append(position)
 
                 if split[2] not in binoutfile_names.keys():#
                     handle = open(os.path.join(bin_folder, split[2] + '.bin'), 'wb')#
@@ -67,62 +68,56 @@ def make_read_dictionary(SAMfile, chromosomes_list, bin_folder, exonDict):
     for f in binoutfile_names.keys():
         binoutfile_names[f].close()
 
-    SAMin.close()
-    return readDict, totalReads
+    sam_handle.close()
+    return read_dict, total_reads
 
 
-def remove_directory(directory, folder):
-    path = os.path.join(directory, folder)
-    os.system("rm -rf " + path)
-
-
-def query(chromosome, geneName, Dict, totalReads, output_file, summary_file):
-    Ctotal = 0
-    Ptotal = 0
+def query(chromosome, gene_name, dict, total_reads, output_file, summary_file):
+    ctotal = 0
+    ptotal = 0
     length = 0
     accession = []
-    for exonTuple in Dict[chromosome]:
-        if exonTuple[4] == geneName:
-            counts = Dict[chromosome][exonTuple]
-            PPM = 0
-            if totalReads > 0:
-                PPM = counts * float(1000000) / totalReads
-            RPKM = PPM * float(1000) / (exonTuple[1] - exonTuple[0])
-            output_file.write("\n" + str(exonTuple) + " Counts:" + str(counts) + " PPM:" + str(PPM) + " RPKM:" + str(RPKM))
-            Ctotal += counts
-            Ptotal += PPM
-            length += exonTuple[1] - exonTuple[0]
-            accession = exonTuple[5]
-    Rtotal = Ptotal * float(1000) / length        
-    output_file.write("\n" + "TOTALS" + "\n" + "Counts:" + str(Ctotal) + " PPM:" + str(Ptotal) + " RPKM:" + str(Rtotal) + " Length:" + str(length) + "\n")
-    summary_file.write("\n" + str(chromosome) + " , " + str(geneName) + " , " + str(Ptotal) + ',' + ','.join([x for x
-                       in accession]))
+    for exon_tuple in dict[chromosome]:
+        if exon_tuple[4] == gene_name:
+            counts = dict[chromosome][exon_tuple]
+            ppm = 0
+            if total_reads > 0:
+                ppm = counts * 1000000.0 / total_reads
+            rpkm = ppm * 1000.0 / (exon_tuple[1] - exon_tuple[0])
+            output_file.write("\n" + str(exon_tuple) + " Counts:" + str(counts) + " PPM:" + str(ppm) + " RPKM:" + str(rpkm))
+            ctotal += counts
+            ptotal += ppm
+            length += exon_tuple[1] - exon_tuple[0]
+            accession = exon_tuple[5]
+    Rtotal = ptotal * 1000.0 / length
+    output_file.write("\n" + "TOTALS" + "\n" + "Counts:" + str(ctotal) + " PPM:" + str(ptotal) + " RPKM:" + str(Rtotal) + " Length:" + str(length) + "\n")
+    summary_file.write("\n" + str(chromosome) + " , " + str(gene_name) + " , " + str(ptotal) + ',' + ','.join([x for x
+                                                                                                               in accession]))
     return Rtotal
 
 
-def write_all_to_file(directory, Dictionary, totalReads, totalReads2, f, sumfolder, chromfolder):
-    v = totalReads
-    vv = totalReads2
-    summaryFile = open(os.path.join(directory, sumfolder, f[:-4] + '_summary.csv'), 'w')
-    summaryFile.write(str(f)+","+str(f)+","+str(f)+","+str(f))
-    summaryFile.write("\n , TotalReads , " + str(v))
-    summaryFile.write("\n , TotalReads (PPM), " + str(vv))
+def write_all_to_file(directory, dict, total_reads, total_hits, filename, summary_folder, chromosome_folder):
+    summaryFile = open(os.path.join(directory, summary_folder, filename[:-4] + '_summary.csv'), 'w')
+    summaryFile.write("File:," + str(filename))
+    summaryFile.write("\n , TotalReads , " + str(total_reads))
+    summaryFile.write("\n , TotalHits (count), " + str(total_hits))
     summaryFile.write("\nChromosome , GeneName , PPM , NCBI_Acc")
-    outFile = open(os.path.join(directory, chromfolder, f[:-4] + '_ChrGene.txt'), 'w')
-    for chrom in Dictionary:
+    outFile = open(os.path.join(directory, chromosome_folder, filename[:-4] + '_ChrGene.txt'), 'w')
+    for chrom in dict:
         geneList = []
-        for exon in Dictionary[chrom]:
+        for exon in dict[chrom]:
             if exon[4] not in geneList:
                 geneList.append(exon[4])
-                query(chrom, exon[4], Dictionary, totalReads2, outFile, summaryFile)
+                query(chrom, exon[4], dict, total_hits, outFile, summaryFile)
     outFile.close()
     summaryFile.close()
 
 
-def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, filename):
+def lets_count(directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, filename):
+    start_time = time.time()
     sys.stdout.write(">>> Started processing file %s\n" % filename)
     sys.stdout.flush()
-    exonDict = get_dictionary(os.path.join('dictionaries', gene_dictionary))
+    exon_dict = get_dictionary(os.path.join('dictionaries', gene_dictionary))
     infile = os.path.join(directory, input_folder, filename)
     gene_count_bin_folder = os.path.join(directory, "gene_count_indices", filename[:-4])
     # bin_folder = ''
@@ -130,39 +125,74 @@ def letsCount(directory, summary_folder, chromosomes_folder, input_folder, chrom
     #     bin_folder = os.path.join(directory, input_folder, '.' + filename[:-4])
     # else:
     #     bin_folder = os.path.join(directory, input_folder, filename[:-4])
-    (readDict, totalReads) = make_read_dictionary(infile, chromosomes_list, gene_count_bin_folder, exonDict)
-    sys.stdout.write(">>> %d Total Reads (%s)\n" % (totalReads, filename))
+    (read_dict, total_reads) = make_read_dictionary(infile, chromosomes_list, gene_count_bin_folder, exon_dict)
+    sys.stdout.write(">>> %d Total Reads (%s)\n" % (total_reads, filename))
     sys.stdout.flush()
-    totalReads2 = 0
-    exon_index = 0
+    total_hits = 0
     for chrom in chromosomes_list:
-        if chrom in exonDict.keys():
-            readList = sorted(readDict[chrom])
-            exonList = sorted(exonDict[chrom].keys())
-            for read in readList:
-                if len(exonList) > 0 and read < exonList[0][0]:
-                    continue
-                for exon in exonList[exon_index:]:
-                    if read >= exon[0] and read <= exon[1]:
-                        exonDict[chrom][exon] += 1
-                        totalReads2 += 1
-                    elif read > exon[1]:
-                        exon_index += 1
-                        # exonList.remove(exon)
-            sys.stdout.write('>>> Finished Chromosome %s%s for File (%s)\n' % (chrom[:20], '' if len(chrom) <= 20 else '...',
-                                                                             filename))
+        if chrom in exon_dict.keys():
+            read_list = read_dict[chrom]
+            exon_dict_list = exon_dict[chrom]
+
+            # Creating KV pairs for AVL tree, start is for beginning of the exon and end is for the last bp of the exon
+            kv_start_pairs = []
+            kv_end_pairs = []
+            for key in exon_dict_list.keys():
+                kv_start_pairs.append((key[0], key))
+                kv_end_pairs.append((key[1], key))
+            tree_start = AVLTree(kv_start_pairs)
+            tree_end = AVLTree(kv_end_pairs)
+            for read in read_list:
+                try:
+                    item_start = tree_start.floor_item(read)
+                    item_end = tree_end.ceiling_item(read)
+                    if item_start[1][0] <= read <= item_start[1][1]:
+                        exon_dict[chrom][item_start[1]] += 1
+                        total_hits += 1
+                    # Check the end item only if the exons from start_tree and end_tree are different
+                    if item_start[1] != item_end[1]:
+                        if item_end[1][0] <= read <= item_end[1][1]:
+                            exon_dict[chrom][item_start[1]] += 1
+                            total_hits += 1
+                except KeyError:
+                    pass
+
+            # read_list = sorted(read_dict[chrom], reverse=False)
+            # exon_list = sorted(exon_dict[chrom].keys(), key=lambda x: x[0])
+            #
+            # Read first and exon next
+            # exon_index = 0
+            # for read in read_list:
+            #     for i in range(exon_index, len(exon_list)):
+            #         if exon_list[i][0] <= read <= exon_list[i][1]:
+            #             exon_dict[chrom][exon_list[i]] += 1
+            #             total_hits += 1
+            #         elif read > exon_list[i][1]:
+            #             exon_index = i
+            sys.stdout.write('>>> Finished chromosome %s%s for file ( %s )\n' % (chrom[:20],
+                                                                               '' if len(chrom) <= 20 else '...',
+                                                                               filename))
             sys.stdout.flush()
             time.sleep(1)
     sys.stdout.write('>>> Creating files and cleaning up... ( %s )\n' % filename)
     sys.stdout.flush()
-    write_all_to_file(directory, exonDict, totalReads, totalReads2, filename, summary_folder, chromosomes_folder)
+    write_all_to_file(directory, exon_dict, total_reads, total_hits, filename, summary_folder, chromosomes_folder)
+    # Time elapsed
+    temp = time.time() - start_time
+    hours = temp // 3600
+    temp = temp - 3600 * hours
+    minutes = temp // 60
+    seconds = temp - 60 * minutes
+    sys.stdout.write('>>> Finished in %d hr, %d min, %d sec for file ( %s )\n' % (hours, minutes, seconds, filename))
+    sys.stdout.flush()
 
 def gene_count(directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, sam_file_list):
     num_cores = Parallel.cpu_count()
     print ">>> Using %d Processor Cores" % (num_cores - 1)
-    Parallel.Parallel(n_jobs=num_cores-1)(Parallel.delayed(letsCount)(directory, summary_folder, chromosomes_folder,
-                                                                      input_folder, chromosomes_list, f) for f in
+    Parallel.Parallel(n_jobs=num_cores-1)(Parallel.delayed(lets_count)(directory, summary_folder, chromosomes_folder,
+                                                                       input_folder, chromosomes_list, f) for f in
                                                                       sam_file_list)
+
 
 def initialize_folders(directory):
     # Creates the folder that will hold the Genecounts summaries
@@ -192,4 +222,3 @@ if __name__ == '__main__':
     chromosomes_list = fileio.get_chromosomes_list(main_directory, chromosomes_list_name, printio)
     if len(sam_file_list) > 0:
         gene_count(main_directory, summary_folder, chromosomes_folder, input_folder, chromosomes_list, sam_file_list)
-    remove_directory(main_directory, 'gene_count_indices')

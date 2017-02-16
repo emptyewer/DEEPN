@@ -47,7 +47,7 @@ BUNDLE_VERSION = VERSION.replace(".", "")
 
 APP = ['gene_count_gui.py']
 INCLUDES = ['PyQt4', 'glob', 'cPickle', 'time', 'sys', 'os', 'pydoc',
-                                                'json', 'numbers', 'hashlib', 'decimal', 'pyqtgraph']
+            'json', 'numbers', 'hashlib', 'decimal', 'pyqtgraph', 'copy']
 OPTIONS = {'argv_emulation': True,
            'iconfile' : 'icon/Icon2.icns',
            'plist': {'CFBundleGetInfoString': 'Gene Count',
@@ -59,9 +59,9 @@ OPTIONS = {'argv_emulation': True,
            'includes': INCLUDES,
            'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
            }
-DATA_FILES = find_data_files(['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', '.', 'ui/Windows'],
-                             ['functions', 'libraries', 'libraries/joblib', 'ui', 'dictionaries', '', 'ui/Windows'],
-                             ['*.py', '*.py', '*.py', '*.ui', '*', '*.txt', '*.ui'])
+DATA_FILES = find_data_files(['functions', 'libraries', 'libraries/joblib', 'libraries/bintrees', 'ui', 'dictionaries', '.', 'ui/Windows'],
+                             ['functions', 'libraries', 'libraries/joblib', 'libraries/bintrees', 'ui', 'dictionaries', '', 'ui/Windows'],
+                             ['*.py', '*.py', '*.py', '*.py', '*.ui', '*', '*.txt', '*.ui'])
 if sys.platform == 'darwin':
     setup(
         app=APP,
