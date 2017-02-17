@@ -127,22 +127,22 @@ class junctionf():
             print ">>> Parsing BLAST results file %s ..." % blasttxt
             blast_dict, accession_dict, gene_dict = self._blast_parser(directory, blast_results_folder,
                                                                        blasttxt, gene_list_file)
-            for key in blast_dict.keys():
-                if key not in ['total', 'pos_que']:
-                    stats = {'in_orf'  : 0, 'in_frame': 0, 'downstream': 0,
-                             'upstream': 0, 'not_in_frame': 0,
-                             'intron'  : 0, 'backwards': 0, 'frame_orf': 0, 'total': 0
-                             }
-                    for nm in blast_dict[key].keys():
-                        blast_dict[key][nm] = list(set(blast_dict[key][nm]))
-                        for j in blast_dict[key][nm]:
-                            j.ppm = blast_dict['pos_que'][j.pos_que] * 1000000 / blast_dict['total']
-                            stats[j.frame] += 1
-                            stats[j.orf] += 1
-                            if j.frame_orf:
-                                stats["frame_orf"] += 1
-                            stats['total'] += 1
-                    blast_dict[key]['stats'] = stats
+            # for key in blast_dict.keys():
+            #     if key not in ['total', 'pos_que']:
+            #         stats = {'in_orf'  : 0, 'in_frame': 0, 'downstream': 0,
+            #                  'upstream': 0, 'not_in_frame': 0,
+            #                  'intron'  : 0, 'backwards': 0, 'frame_orf': 0, 'total': 0
+            #                  }
+            #         for nm in blast_dict[key].keys():
+            #             blast_dict[key][nm] = list(set(blast_dict[key][nm]))
+            #             for j in blast_dict[key][nm]:
+            #                 j.ppm = blast_dict['pos_que'][j.pos_que] * 1000000 / blast_dict['total']
+            #                 stats[j.frame] += 1
+            #                 stats[j.orf] += 1
+            #                 if j.frame_orf:
+            #                     stats["frame_orf"] += 1
+            #                 stats['total'] += 1
+            #         blast_dict[key]['stats'] = stats
 
             blast_dict.pop('pos_que')
             blast_query_p = open(os.path.join(directory, blast_results_query_folder,

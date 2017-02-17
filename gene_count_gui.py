@@ -53,17 +53,17 @@ def make_read_dictionary(sam_file, chromosomes_list, bin_folder, exon_dict):
         if line != '\n':
             if not re.match(r'^@', split[0]):
                 chromosome = split[2][3:]
-                RUmapped = split[2]
+                r_umapped = split[2]
                 position = int(split[3])
-                if RUmapped != '*' and chromosome in exon_dict.keys():
+                if r_umapped != '*' and chromosome in exon_dict.keys():
                     total_reads += 1
                     iterations += 1
                     read_dict[chromosome].append(position)
 
-                if split[2] not in binoutfile_names.keys():#
-                    handle = open(os.path.join(bin_folder, split[2] + '.bin'), 'wb')#
-                    binoutfile_names[split[2]] = handle#
-                binoutfile_names[split[2]].write('%s:%s\n' % (split[3], split[9]))#
+                if split[2] not in binoutfile_names.keys():
+                    handle = open(os.path.join(bin_folder, split[2] + '.bin'), 'wb')
+                    binoutfile_names[split[2]] = handle
+                binoutfile_names[split[2]].write('%s:%s\n' % (split[3], split[9]))
 
     for f in binoutfile_names.keys():
         binoutfile_names[f].close()
