@@ -1,7 +1,9 @@
-import re
+import time
 import os
 import glob
 import sys
+import subprocess
+from libraries.pyper import *
 
 class fileio():
     """Functions to process files and directories"""
@@ -26,6 +28,55 @@ class fileio():
             if os.path.splitext(file)[1] == suffix:
                 returnList.append(file)
         return(returnList)
+
+    def get_exec_path(self, executable):
+        if os.path.exists('/usr/local/bin/' + executable):
+            return True
+        if os.path.exists('/usr/bin/' + executable):
+            return True
+        return False
+
+    def check_deepn_installed(self, parent):
+        dout = parent.r("require('deepn')")
+        dout = dout.replace(' ', '')
+        dout = dout.replace('\n', '')
+        if re.match('.+nopackage.+', dout):
+            return False
+        return True
+
+    def verify_statmaker_installations(self, parent):
+        if not self.get_exec_path('jags'):
+            parent.verify_installation_btn.setText("Installing JAGS...")
+            subprocess.Popen('open statistics/JAGS.pkg', shell=True)
+            while not self.get_exec_path('jags'):
+                time.sleep(0.5)
+
+        if os.path.exists('/usr/local/bin/jags'):
+            self.jags_path = '/usr/local/bin/jags'
+        if os.path.exists('/usr/bin/jags'):
+            self.jags_path = '/usr/bin/jags'
+
+        if not self.get_exec_path('R'):
+            parent.verify_installation_btn.setText("Installing R...")
+            subprocess.Popen('open statistics/R.pkg', shell=True)
+            while not self.get_exec_path('R'):
+                time.sleep(0.5)
+
+        if os.path.exists('/usr/local/bin/R'):
+            parent.r_path = '/usr/local/bin/R'
+        if os.path.exists('/usr/bin/R'):
+            parent.r_path = '/usr/bin/R'
+
+        if os.path.exists(parent.r_path):
+            parent.r = R(RCMD=parent.r_path)
+            if not self.check_deepn_installed(parent):
+                parent.verify_installation_btn.setText("Finishing Installation...")
+                subprocess.Popen(['bash install_deepn.sh ' + parent.r_path], shell=True)
+                while not self.check_deepn_installed(parent):
+                    time.sleep(0.5)
+            else:
+                parent.statusbar.showMessage("Updating DEEPN...")
+                subprocess.Popen(['bash update_deepn.sh ' + parent.r_path], shell=True)
 
     # def check_path(self, directory, folder, comment):
     #     if not os.path.exists(os.path.join(directory, folder)):
