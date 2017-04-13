@@ -1,5 +1,4 @@
 import os
-import re
 import sys
 import struct
 import cPickle
@@ -48,14 +47,12 @@ class junctionf():
         return list
 
     def junction_search(self, directory, junction_folder, input_data_folder, blast_results_folder,
-                        blast_results_query, junction_sequence, exclusion_sequence):
+                        blast_results_query, junctions_array, exclusion_sequence):
         # junction_sequence = self._getjunction(">junctionseq")
-        junction_sequence.upper()
         exclusion_sequence.upper()
-        junct1, junct2, junct3 = self._make_search_junctions(junction_sequence)
+        jseqs = self._make_search_junctions(junctions_array)
         print ">>> The primary, secondary, and tertiary sequences searched are:"
         sys.stdout.flush()
-        self.printio.print_progress(0, junct1, junct2, junct3, 4)
         unmapped_sam_files = self.fileio.get_sam_filelist(directory, input_data_folder)
         processed_file_list = self.fileio.get_file_list(directory, blast_results_query, ".bqa")
         unmapped_sam_files = self._get_unprocessed_files(unmapped_sam_files, ".sam", processed_file_list, ".bqa")
@@ -64,11 +61,16 @@ class junctionf():
         sys.stdout.flush()
 
         for f in unmapped_sam_files:
-            input_file = open(os.path.join(directory, input_data_folder, f), 'r')
-            output_file = open(os.path.join(directory, junction_folder, f.replace(".sam", '.junctions.txt')), 'w')
-            self._search_for_HA(input_file, junct1, junct2, junct3, exclusion_sequence, output_file, f)
+            open(filename)
+            filename = os.path.join(directory, input_data_folder, f)
+            input_filehandle = open(filename)
+            input_file_size = os.path.getsize(filename)
+            output_filehandle = open(os.path.join(directory, junction_folder, f.replace(".sam", '.junctions.txt')), 'w')
+            # self._search_for_HA(input_file, junct1, junct2, junct3, exclusion_sequence, output_file, f, input_file_size)
             # self._search_junctions(input_file, junction_sequence, output_file)
-            output_file.close()
+            self._search_for_junctions(input_filehandle, jseqs, exclusion_sequence, output_filehandle, f, input_file_size)
+            output_filehandle.close()
+            input_filehandle.close()
         self._multi_convert(directory, junction_folder, blast_results_folder, blast_results_query)
 
     def _multi_convert(self, directory, infolder, outfolder, blast_results_query):
@@ -158,150 +160,54 @@ class junctionf():
         self.fileio.remove_file(directory, blast_results_folder,
                                 self.fileio.get_file_list(directory, blast_results_folder, ".fa"))
 
-    def _search_junctions(self, infile, junction_sequence, outfile):
-        def longest_common_substring(s1, s2):
-            m = [[0] * (1 + len(s2)) for i in xrange(1 + len(s1))]
-            longest, x_longest = 0, 0
-            for x in xrange(1, 1 + len(s1)):
-                for y in xrange(1, 1 + len(s2)):
-                    if s1[x - 1] == s2[y - 1]:
-                        m[x][y] = m[x - 1][y - 1] + 1
-                        if m[x][y] > longest:
-                            longest = m[x][y]
-                            x_longest = x
-                    else:
-                        m[x][y] = 0
-            return s1[x_longest - longest: x_longest]
-        reads = 0
-        iterations = 0
-        reverse_junction_sequence = self.process.reverse_complement(junction_sequence)
-        for line in infile.readlines():
-            split = line.split()
-            if split[0][0] != '@' and split[2] == '*':
-                read = split[9]
-                reads += 1
-                iterations += 1
-                if iterations == 5000:
-                    iterations = 0
-                    sys.stdout.write('.', )
+    def _junctions_in_read(self, read, jseqs):
+        match_index = -1
+        junction_index = -1
+        for i, j in enumerate(jseqs):
+            if j in read:
+                match_index = read.index(j)
+                junction_index = i
+        return (junction_index, match_index)
+
+    def _search_for_junctions(self, input_filehandle, jseqs, exclusion_sequence, output_filehandle, f, input_file_size):
+        hits_count = 0
+        def check_matching_criteria(l, indexes, jseqs, read):
+            value = 0
+            if indexes[0] != -1:
+                junction = jseqs[indexes[0]]
+                downstream_rf = read[len(junction) + indexes[1] + (indexes[0] % 3) * 4:]
+                if len(downstream_rf) > 25:
+                    if exclusion_sequence not in downstream_rf or exclusion_sequence == '':
+                        value = 1
+                        protein_sequence = self.process.translate_orf(downstream_rf)
+                        output_filehandle.write(" ".join(l[:5]) + " " + l[9] + " " + downstream_rf
+                                                + " " + protein_sequence + "\n")
+            return value
+
+        reads_count = 0
+        for line in input_filehandle:
+            line_split = line.strip().split()
+            if line_split[0][0] != "@" and line_split[2] == "*":
+                reads_count += 1
+                if reads_count % 5000 == 0:
+                    sys.stdout.write('\rRead %.3f%% of file...' % (input_filehandle.tell() * 100.0 / input_file_size))
                     sys.stdout.flush()
-                substring = longest_common_substring(junction_sequence, read)
-                rev_substring = longest_common_substring(reverse_junction_sequence, read)
-                jloc = junction_sequence.find(substring) + len(substring)
-                jloc_rev = reverse_junction_sequence.find(rev_substring) + len(rev_substring)
-                rloc = read.find(substring) + len(substring) + len(junction_sequence) - jloc
-                rloc_rev = read.find(reverse_junction_sequence) + len(rev_substring) + \
-                           len(reverse_junction_sequence) - jloc_rev
+                sequence_read = line_split[9]
+                rev_sequence_read = self.process.reverse_complement(sequence_read)
+                fwd_indexes = self._junctions_in_read(sequence_read, jseqs)
+                hit = check_matching_criteria(line_split, fwd_indexes, jseqs, sequence_read)
+                if hit == 0:
+                    rev_indexes = self._junctions_in_read(rev_sequence_read, jseqs)
+                    hit = check_matching_criteria(line_split, rev_indexes, jseqs, rev_sequence_read)
+                hits_count += hit
 
-                if jloc >= len(junction_sequence) - 1 and len(read) - rloc > 25 and len(substring) > 15:
-                    outfile.write(str(split[0]) + " "
-                                  + str(split[1]) + " "
-                                  + str(split[2]) + " "
-                                  + str(split[3]) + " "
-                                  + str(split[9]) + " "
-                                  + read[rloc:] + " "
-                                  + self.process.translate_orf(read[rloc:]) + "\n")
-                    continue
-
-                if jloc_rev >= len(reverse_junction_sequence) - 1 and len(read) - rloc_rev > 25 and len(rev_substring) > 15:
-                    outfile.write(str(split[0]) + " "
-                                  + str(split[1]) + " "
-                                  + str(split[2]) + " "
-                                  + str(split[3]) + " "
-                                  + str(split[9]) + " "
-                                  + read[rloc_rev:] + " "
-                                  + self.process.translate_orf(read[rloc_rev:]) + "\n")
-
-
-    def _search_for_HA(self, infile, primaryJunct, secondaryJunct, tertiaryJunct, exclusion_sequence, OutFile, f):
-        HA = primaryJunct
-        HArev = self.process.reverse_complement(HA)
-        HA2 = secondaryJunct 
-        HA2rev = self.process.reverse_complement(HA2)
-        HA3 = tertiaryJunct 
-        HA3rev = self.process.reverse_complement(HA2)
-        Hits2 = 0
-        Hits = 0
-        reads = 0
-        iterations = 0
-        toggle = 0
-        exclusion = re.compile(exclusion_sequence)
-        self.printio.print_progress(f, 0, 0, 0, 1)
-        for line in infile:
-            line.strip()
-            splitLine = line.split()
-            if splitLine[0][0] != '@' and splitLine[2] == '*':
-                reads += 1
-                iterations += 1
-                if iterations == 5000:
-                    iterations = 0
-                    sys.stdout.write('\b.',)
-                    sys.stdout.flush()
-                          
-                if HA in splitLine[9] or HArev in splitLine[9] or HA2 in splitLine[9] or \
-                   HA2rev in splitLine[9] or HA3 in splitLine[9] or HA3rev in splitLine[9]:
-                    Hits += 1
-                    if HA in splitLine[9]:
-                        HAindex = splitLine[9].index(HA)
-                        DSRF = splitLine[9][(HAindex + len(HA)):]
-                        if len(DSRF) > 25:
-                            if not exclusion.match(DSRF):
-                                Protein = self.process.translate_orf(DSRF)
-                                Hits2 += 1
-                                toggle = 1
-                    elif HArev in splitLine[9]:
-                        HARevCom = self.process.reverse_complement(splitLine[9])
-                        HAindex = HARevCom.index(HA)
-                        DSRF = HARevCom[(HAindex + len(HA)):]
-                        if len(DSRF) > 25:
-                            if not exclusion.match(DSRF):
-                                Protein = self.process.translate_orf(DSRF)
-                                Hits2 += 1
-                                toggle = 1
-                    elif HA2 in splitLine[9]:
-                        HA2index = splitLine[9].index(HA2)
-                        DSRF = splitLine[9][(HA2index+len(HA2)+4):]
-                        if len(DSRF) > 25:
-                            if not exclusion.match(DSRF):
-                                Protein = self.process.translate_orf(DSRF)
-                                Hits2 += 1
-                                toggle = 1
-                    elif HA2rev in splitLine[9]:
-                        HARevCom = self.process.reverse_complement(splitLine[9])
-                        HA2index = HARevCom.index(HA2)
-                        DSRF = HARevCom[(HA2index + len(HA2)+4):]
-                        if len(DSRF) > 25:
-                            if not exclusion.match(DSRF):
-                                Protein = self.process.translate_orf(DSRF)
-                                Hits2 += 1
-                                toggle = 1
-                    elif HA3 in splitLine[9]:
-                        HA3index = splitLine[9].index(HA3)
-                        DSRF = splitLine[9][(HA3index+len(HA3)+8):]
-                        if len(DSRF) > 25:
-                            if not exclusion.match(DSRF):
-                                Protein = self.process.translate_orf(DSRF)
-                                Hits2 += 1
-                                toggle = 1
-                    elif HA3rev in splitLine[9]:
-                        HARevCom = self.process.reverse_complement(splitLine[9])
-                        HA3index = HARevCom.index(HA3)
-                        DSRF = splitLine[9][(HA3index+len(HA3)+8):]
-                        if len(DSRF) > 25:
-                            if not exclusion.match(DSRF):
-                                Protein = self.process.translate_orf(DSRF)
-                                Hits2 += 1
-                                toggle = 1
-                    if toggle == 1:
-                        if not exclusion.match(DSRF):
-                            OutFile.write(str(splitLine[0]) + " " + str(splitLine[1]) + " " + str(splitLine[2]) + " " + str(splitLine[3]) + " " + str(splitLine[9]) + " " + DSRF + " " + Protein + "\n")
-                            toggle = 0
-
-    def _make_search_junctions(self, HAseq):
-        x = HAseq[35:50]
-        y = HAseq[31:46]
-        z = HAseq[27:42] 
-        return[x, y, z]
+    def _make_search_junctions(self, junctions_array):
+        jseqs = []
+        for junc in junctions_array:
+            jseqs.append(junc[35:50])
+            jseqs.append(junc[31:46])
+            jseqs.append(junc[27:42])
+        return jseqs
 
     def _get_accession_number_list(self, gene_list_file):
         fh = open(os.path.join('lists', gene_list_file), 'r')
@@ -394,3 +300,143 @@ class junctionf():
         results_dictionary['pos_que'] = Counter(pos_que)
         blast_results_handle.close()
         return results_dictionary, accession_dict, gene_dict
+
+    # def _search_junctions(self, infile, junction_sequence, outfile):
+    #     def longest_common_substring(s1, s2):
+    #         m = [[0] * (1 + len(s2)) for i in xrange(1 + len(s1))]
+    #         longest, x_longest = 0, 0
+    #         for x in xrange(1, 1 + len(s1)):
+    #             for y in xrange(1, 1 + len(s2)):
+    #                 if s1[x - 1] == s2[y - 1]:
+    #                     m[x][y] = m[x - 1][y - 1] + 1
+    #                     if m[x][y] > longest:
+    #                         longest = m[x][y]
+    #                         x_longest = x
+    #                 else:
+    #                     m[x][y] = 0
+    #         return s1[x_longest - longest: x_longest]
+    #     reads = 0
+    #     iterations = 0
+    #     reverse_junction_sequence = self.process.reverse_complement(junction_sequence)
+    #     for line in infile.readlines():
+    #         split = line.split()
+    #         if split[0][0] != '@' and split[2] == '*':
+    #             read = split[9]
+    #             reads += 1
+    #             iterations += 1
+    #             if iterations == 5000:
+    #                 iterations = 0
+    #                 sys.stdout.write('.', )
+    #                 sys.stdout.flush()
+    #             substring = longest_common_substring(junction_sequence, read)
+    #             rev_substring = longest_common_substring(reverse_junction_sequence, read)
+    #             jloc = junction_sequence.find(substring) + len(substring)
+    #             jloc_rev = reverse_junction_sequence.find(rev_substring) + len(rev_substring)
+    #             rloc = read.find(substring) + len(substring) + len(junction_sequence) - jloc
+    #             rloc_rev = read.find(reverse_junction_sequence) + len(rev_substring) + \
+    #                        len(reverse_junction_sequence) - jloc_rev
+    #
+    #             if jloc >= len(junction_sequence) - 1 and len(read) - rloc > 25 and len(substring) > 15:
+    #                 outfile.write(str(split[0]) + " "
+    #                               + str(split[1]) + " "
+    #                               + str(split[2]) + " "
+    #                               + str(split[3]) + " "
+    #                               + str(split[9]) + " "
+    #                               + read[rloc:] + " "
+    #                               + self.process.translate_orf(read[rloc:]) + "\n")
+    #                 continue
+    #
+    #             if jloc_rev >= len(reverse_junction_sequence) - 1 and len(read) - rloc_rev > 25 and len(rev_substring) > 15:
+    #                 outfile.write(str(split[0]) + " "
+    #                               + str(split[1]) + " "
+    #                               + str(split[2]) + " "
+    #                               + str(split[3]) + " "
+    #                               + str(split[9]) + " "
+    #                               + read[rloc_rev:] + " "
+    #                               + self.process.translate_orf(read[rloc_rev:]) + "\n")
+
+
+    # def _search_for_HA(self, infile, primaryJunct, secondaryJunct, tertiaryJunct, exclusion_sequence, OutFile, f,
+    #                    input_file_size):
+    #     HA = primaryJunct
+    #     HArev = self.process.reverse_complement(HA)
+    #     HA2 = secondaryJunct
+    #     HA2rev = self.process.reverse_complement(HA2)
+    #     HA3 = tertiaryJunct
+    #     HA3rev = self.process.reverse_complement(HA2)
+    #     Hits2 = 0
+    #     Hits = 0
+    #     reads = 0
+    #     iterations = 0
+    #     toggle = 0
+    #     self.printio.print_progress(f, 0, 0, 0, 1)
+    #     for line in infile:
+    #         line.strip()
+    #         splitLine = line.split()
+    #         if splitLine[0][0] != '@' and splitLine[2] == '*':
+    #             reads += 1
+    #             iterations += 1
+    #             if iterations == 5000:
+    #                 iterations = 0
+    #                 sys.stdout.write('\rRead %.3f%% of file...' % (infile.tell() * 100.0 / input_file_size))
+    #                 sys.stdout.flush()
+    #
+    #             if HA in splitLine[9] or HArev in splitLine[9] or HA2 in splitLine[9] or \
+    #                             HA2rev in splitLine[9] or HA3 in splitLine[9] or HA3rev in splitLine[9]:
+    #                 Hits += 1
+    #                 if HA in splitLine[9]:
+    #                     HAindex = splitLine[9].index(HA)
+    #                     DSRF = splitLine[9][(HAindex + len(HA)):]
+    #                     if len(DSRF) > 25:
+    #                         if exclusion_sequence not in DSRF or exclusion_sequence == '':
+    #                             Protein = self.process.translate_orf(DSRF)
+    #                             Hits2 += 1
+    #                             toggle = 1
+    #                 elif HArev in splitLine[9]:
+    #                     HARevCom = self.process.reverse_complement(splitLine[9])
+    #                     HAindex = HARevCom.index(HA)
+    #                     DSRF = HARevCom[(HAindex + len(HA)):]
+    #                     if len(DSRF) > 25:
+    #                         if exclusion_sequence not in DSRF or exclusion_sequence == '':
+    #                             Protein = self.process.translate_orf(DSRF)
+    #                             Hits2 += 1
+    #                             toggle = 1
+    #                 elif HA2 in splitLine[9]:
+    #                     HA2index = splitLine[9].index(HA2)
+    #                     DSRF = splitLine[9][(HA2index + len(HA2) + 4):]
+    #                     if len(DSRF) > 25:
+    #                         if exclusion_sequence not in DSRF or exclusion_sequence == '':
+    #                             Protein = self.process.translate_orf(DSRF)
+    #                             Hits2 += 1
+    #                             toggle = 1
+    #                 elif HA2rev in splitLine[9]:
+    #                     HARevCom = self.process.reverse_complement(splitLine[9])
+    #                     HA2index = HARevCom.index(HA2)
+    #                     DSRF = HARevCom[(HA2index + len(HA2) + 4):]
+    #                     if len(DSRF) > 25:
+    #                         if exclusion_sequence not in DSRF or exclusion_sequence == '':
+    #                             Protein = self.process.translate_orf(DSRF)
+    #                             Hits2 += 1
+    #                             toggle = 1
+    #                 elif HA3 in splitLine[9]:
+    #                     HA3index = splitLine[9].index(HA3)
+    #                     DSRF = splitLine[9][(HA3index + len(HA3) + 8):]
+    #                     if len(DSRF) > 25:
+    #                         if exclusion_sequence not in DSRF or exclusion_sequence == '':
+    #                             Protein = self.process.translate_orf(DSRF)
+    #                             Hits2 += 1
+    #                             toggle = 1
+    #                 elif HA3rev in splitLine[9]:
+    #                     HARevCom = self.process.reverse_complement(splitLine[9])
+    #                     HA3index = HARevCom.index(HA3)
+    #                     DSRF = splitLine[9][(HA3index + len(HA3) + 8):]
+    #                     if len(DSRF) > 25:
+    #                         if exclusion_sequence not in DSRF or exclusion_sequence == '':
+    #                             Protein = self.process.translate_orf(DSRF)
+    #                             Hits2 += 1
+    #                             toggle = 1
+    #                 if toggle == 1:
+    #                     if exclusion_sequence not in DSRF or exclusion_sequence == '':
+    #                         OutFile.write(str(splitLine[0]) + " " + str(splitLine[1]) + " " + str(splitLine[2]) + " " + str(
+    #                                 splitLine[3]) + " " + str(splitLine[9]) + " " + DSRF + " " + Protein + "\n")
+    #                         toggle = 0
