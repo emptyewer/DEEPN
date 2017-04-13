@@ -64,7 +64,7 @@ DATA_FILES = find_data_files(['functions', 'ui', '.', 'ui/Windows'],
 if sys.platform == 'darwin':
     setup(
         app=APP,
-        name='DEEPN3',
+        name='DEEPN',
         options={'py2app': OPTIONS},
         setup_requires=['py2app'],
         author='Venkatramanan Krishnamani, Robert C. Piper, Mark Stammnes',

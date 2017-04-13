@@ -5,7 +5,7 @@ if sys.platform == 'darwin':
     import py2app
 elif sys.platform == 'win32':
     import py2exe
-
+sys.setrecursionlimit(100000)
 
 VERSION = os.environ['DEEPN_VERSION']
 BUNDLE_VERSION = VERSION.replace(".", "")

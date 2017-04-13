@@ -2,33 +2,33 @@ class process():
 
     def __init__(self):
         self.codonTable = {"TTT" : "F", "TTC" : "F", "TTA" : "L", "TTG" : "L",
-                   "TCT"  : "S", "TCC"  : "S", "TCA"  : "S", "TCG"  : "S",
-                   "TAT"  : "Y", "TAC"  : "Y", "TAA"  : ".", "TAG"  : ".",
-                   "TGT"  : "C", "TGC"  : "C", "TGA"  : ".", "TGG"  : "W",
-                   "CTT"  : "L", "CTC"  : "L", "CTA"  : "L", "CTG"  : "L",
-                   "CCT"  : "P", "CCC"  : "P", "CCA"  : "P", "CCG"  : "P",
-                   "CAT"  : "H", "CAC"  : "H", "CAA"  : "Q", "CAG"  : "Q",
-                   "CGT"  : "R", "CGC"  : "R", "CGA"  : "R", "CGG"  : "R",
-                   "ATT"  : "I", "ATC"  : "I", "ATA"  : "I", "ATG"  : "M",
-                   "ACT"  : "T", "ACC"  : "T", "ACA"  : "T", "ACG"  : "T",
-                   "AAT"  : "N", "AAC"  : "N", "AAA"  : "K", "AAG"  : "K",
-                   "AGT"  : "S", "AGC"  : "S", "AGA"  : "R", "AGG"  : "R",
-                   "GTT"  : "V", "GTC"  : "V", "GTA"  : "V", "GTG"  : "V",
-                   "GCT"  : "A", "GCC"  : "A", "GCA"  : "A", "GCG"  : "A",
-                   "GAT"  : "D", "GAC"  : "D", "GAA"  : "E", "GAG"  : "E",
-                   "GGT"  : "G", "GGC"  : "G", "GGA"  : "G", "GGG"  : "G",}
+                           "TCT"  : "S", "TCC"  : "S", "TCA"  : "S", "TCG"  : "S",
+                           "TAT"  : "Y", "TAC"  : "Y", "TAA"  : ".", "TAG"  : ".",
+                           "TGT"  : "C", "TGC"  : "C", "TGA"  : ".", "TGG"  : "W",
+                           "CTT"  : "L", "CTC"  : "L", "CTA"  : "L", "CTG"  : "L",
+                           "CCT"  : "P", "CCC"  : "P", "CCA"  : "P", "CCG"  : "P",
+                           "CAT"  : "H", "CAC"  : "H", "CAA"  : "Q", "CAG"  : "Q",
+                           "CGT"  : "R", "CGC"  : "R", "CGA"  : "R", "CGG"  : "R",
+                           "ATT"  : "I", "ATC"  : "I", "ATA"  : "I", "ATG"  : "M",
+                           "ACT"  : "T", "ACC"  : "T", "ACA"  : "T", "ACG"  : "T",
+                           "AAT"  : "N", "AAC"  : "N", "AAA"  : "K", "AAG"  : "K",
+                           "AGT"  : "S", "AGC"  : "S", "AGA"  : "R", "AGG"  : "R",
+                           "GTT"  : "V", "GTC"  : "V", "GTA"  : "V", "GTG"  : "V",
+                           "GCT"  : "A", "GCC"  : "A", "GCA"  : "A", "GCG"  : "A",
+                           "GAT"  : "D", "GAC"  : "D", "GAA"  : "E", "GAG"  : "E",
+                           "GGT"  : "G", "GGC"  : "G", "GGA"  : "G", "GGG"  : "G",}
 
         self.base_complement = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G', 'N': 'N'}
     
     def translate_orf(self, ORF):
         protein_sequence = ""
-        try:
-            for codon in range(0, (len(ORF)-1),3):
+        for codon in range(0, (len(ORF)-1),3):
+            try:
                 amino_acid = self.codonTable[ORF[codon:codon+3]]
-                protein_sequence = protein_sequence + amino_acid           
-            return protein_sequence
-        except KeyError:
-            return protein_sequence
+                protein_sequence += amino_acid
+            except KeyError:
+                protein_sequence += 'X'
+        return protein_sequence
 
     def _complement(self, s): 
         letters = list(s) 

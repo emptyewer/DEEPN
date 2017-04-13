@@ -6,6 +6,7 @@ if sys.platform == 'darwin':
     import py2app
 elif sys.platform == 'win32':
     import py2exe
+sys.setrecursionlimit(100000)
 
 def find_data_files(sources, targets, patterns):
     """Locates the specified data-files and returns the matches
