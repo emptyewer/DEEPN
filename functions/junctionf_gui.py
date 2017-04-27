@@ -54,14 +54,13 @@ class junctionf():
         print ">>> The primary, secondary, and tertiary sequences searched are:"
         sys.stdout.flush()
         unmapped_sam_files = self.fileio.get_sam_filelist(directory, input_data_folder)
-        processed_file_list = self.fileio.get_file_list(directory, blast_results_query, ".bqa")
-        unmapped_sam_files = self._get_unprocessed_files(unmapped_sam_files, ".sam", processed_file_list, ".bqa")
 
         print '>>> Starting junction search.'
         sys.stdout.flush()
 
         for f in unmapped_sam_files:
-            open(filename)
+            print '>>> File: ', f
+            sys.stdout.flush()
             filename = os.path.join(directory, input_data_folder, f)
             input_filehandle = open(filename)
             input_file_size = os.path.getsize(filename)
@@ -71,12 +70,11 @@ class junctionf():
             self._search_for_junctions(input_filehandle, jseqs, exclusion_sequence, output_filehandle, f, input_file_size)
             output_filehandle.close()
             input_filehandle.close()
-        self._multi_convert(directory, junction_folder, blast_results_folder, blast_results_query)
+        self._multi_convert(directory, junction_folder, blast_results_folder)
 
-    def _multi_convert(self, directory, infolder, outfolder, blast_results_query):
+    def _multi_convert(self, directory, infolder, outfolder):
         file_list = self.fileio.get_file_list(directory, infolder, ".txt")
-        processed_file_list = self.fileio.get_file_list(directory, blast_results_query, ".bqa")
-        file_list = self._get_unprocessed_files(file_list, ".junctions.txt", processed_file_list, ".bqa")
+
         print ' '
         for f in file_list:
             self.fileio.make_FASTA(os.path.join(directory, infolder, f),
@@ -107,8 +105,7 @@ class junctionf():
         print ">>> Selected Blast DB: %s" % db_name
         sys.stdout.flush()
         file_list = self.fileio.get_file_list(directory, blast_results_folder, ".fa")
-        processed_file_list = self.fileio.get_file_list(directory, blast_results_query, ".bqa")
-        file_list = self._get_unprocessed_files(file_list, ".junctions.txt", processed_file_list, ".bqa")
+
         for file_name in file_list:
             output_file = os.path.join(directory, blast_results_folder, file_name.replace(".junctions.fa", '.blast.txt'))
             blast_command_list = [os.path.join(blast_path, 'blastn' + suffix),
@@ -124,39 +121,31 @@ class junctionf():
 
     def generate_tabulated_blast_results(self, directory, blast_results_folder, blast_results_query_folder, gene_list_file):
         blast_list = self.fileio.get_file_list(directory, blast_results_folder, ".txt")
-        processed_file_list = self.fileio.get_file_list(directory, blast_results_query_folder, ".bqa")
-        blast_list = self._get_unprocessed_files(blast_list, ".blast.txt",  processed_file_list, ".bqa")
 
         for blasttxt in blast_list:
             print ">>> Parsing BLAST results file %s ..." % blasttxt
-            blast_dict, accession_dict, gene_dict = self._blast_parser(directory, blast_results_folder,
-                                                                       blasttxt, gene_list_file)
-            # for key in blast_dict.keys():
-            #     if key not in ['total', 'pos_que']:
-            #         stats = {'in_orf'  : 0, 'in_frame': 0, 'downstream': 0,
-            #                  'upstream': 0, 'not_in_frame': 0,
-            #                  'intron'  : 0, 'backwards': 0, 'frame_orf': 0, 'total': 0
-            #                  }
-            #         for nm in blast_dict[key].keys():
-            #             blast_dict[key][nm] = list(set(blast_dict[key][nm]))
-            #             for j in blast_dict[key][nm]:
-            #                 j.ppm = blast_dict['pos_que'][j.pos_que] * 1000000 / blast_dict['total']
-            #                 stats[j.frame] += 1
-            #                 stats[j.orf] += 1
-            #                 if j.frame_orf:
-            #                     stats["frame_orf"] += 1
-            #                 stats['total'] += 1
-            #         blast_dict[key]['stats'] = stats
+            blast_dict, gene_dict = self._blast_parser(directory, blast_results_folder,
+                                                       blasttxt, gene_list_file)
+            for gene in blast_dict.keys():
+                if gene not in ['total', 'pos_que']:
+                    stats = {'in_orf'  : 0, 'in_frame': 0, 'downstream': 0,
+                             'upstream': 0, 'not_in_frame': 0,
+                             'intron'  : 0, 'backwards': 0, 'frame_orf': 0, 'total': 0
+                             }
+                    for nm in blast_dict[gene].keys():
+                        for j in blast_dict[gene][nm]:
+                            j.ppm = j.count * 1000000 / blast_dict['total']
+                            stats[j.frame] += 1
+                            stats[j.orf] += 1
+                            if j.frame_orf:
+                                stats["frame_orf"] += 1
+                            stats['total'] += 1
+                    blast_dict[gene]['stats'] = stats
 
-            blast_dict.pop('pos_que')
             blast_query_p = open(os.path.join(directory, blast_results_query_folder,
                                               blasttxt.replace(".blast.txt", ".bqp")), "wb")
-            lists_p = open(os.path.join(directory, blast_results_query_folder,
-                                              blasttxt.replace(".blast.txt", ".bqa")), "wb")
             cPickle.dump(blast_dict, blast_query_p)
-            cPickle.dump([accession_dict, gene_dict], lists_p)
             blast_query_p.close()
-            lists_p.close()
         self.fileio.remove_file(directory, blast_results_folder,
                                 self.fileio.get_file_list(directory, blast_results_folder, ".fa"))
 
@@ -230,10 +219,8 @@ class junctionf():
         print_counter = 0
         previous_bitscore = 0
         results_dictionary = {}
-        accession_dict = {}
         gene_dict = {}
         collect_results = 'n'
-        pos_que = []
         for line in blast_results_handle.readlines():
             line.strip()
             split = line.split()
@@ -251,18 +238,14 @@ class junctionf():
                 previous_bitscore = float(split[11]) * 0.98
                 nm_number = split[1]
                 gene_name = gene_list[nm_number]['gene_name']
-                accession_dict[nm_number] = gene_list[nm_number]['gene_name']
                 if gene_name not in gene_dict.keys():
                     gene_dict[gene_name] = [nm_number]
                 else:
                     gene_dict[gene_name].append(nm_number)
 
-                pq = nm_number + "-" + split[8] + "-" + split[6]
                 j = sts.jcnt()
                 j.position = int(split[8])
                 j.query_start = int(split[6])
-                j.pos_que = pq
-                pos_que.append(pq)
                 fudge_factor = j.query_start - 1
                 frame = j.position - gene_list[nm_number]['orf_start'] - fudge_factor
                 if frame % 3 == 0 or frame == 0:
@@ -291,15 +274,23 @@ class junctionf():
                     results_dictionary[gene_name][nm_number] = [j]
                 else:
                     if nm_number not in results_dictionary[gene_name].keys():
-                        results_dictionary[gene_name][nm_number] = [j]
+                        results_dictionary[gene_name][nm_number] = []
+
+                    junction_present = False
+                    junction_index = 0
+                    for index, pj in enumerate(results_dictionary[gene_name][nm_number]):
+                        if pj.position == j.position and pj.query_start == j.query_start:
+                            junction_index = index
+                            junction_present = True
+                    if junction_present:
+                        results_dictionary[gene_name][nm_number][junction_index].count += 1
                     else:
                         results_dictionary[gene_name][nm_number].append(j)
             else:
                 collect_results = 'n'
         results_dictionary['total'] = blast_results_count
-        results_dictionary['pos_que'] = Counter(pos_que)
         blast_results_handle.close()
-        return results_dictionary, accession_dict, gene_dict
+        return results_dictionary, gene_dict
 
     # def _search_junctions(self, infile, junction_sequence, outfile):
     #     def longest_common_substring(s1, s2):

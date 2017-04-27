@@ -103,7 +103,9 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
         self.table_filtered = None
         # Cache for storing data
         self.gene_info_list = OrderedDict()
+        self.accession_number_list = OrderedDict()
         self.datasets_cache = OrderedDict()
+        self.sequences_info_list = {}
         # Methods
         self._initialize_ui_elements()
         # Results Store
@@ -133,12 +135,15 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
                     self.search_bar.setText(self.clipboard)
                     self.old_clipboard = self.clipboard
                     self.search_bar.editingFinished.emit()
+                else:
+                    subprocess.check_output('pbcopy </dev/null')
             # else:
             #     self.search_bar.setText("Copy a valid accession number or gene name to the clipboard")
             time.sleep(0.5)
 
     def _initialize_ui_elements(self):
-        self.gene_info_list, self.accession_numbers_list = self.get_indexes()
+        thread.start_new_thread(self.monitor_clipboard, ())
+        # self.gene_info_list, self.accession_numbers_list = self.get_indexes()
         self.get_sequences()
         self.populate_gene_suggestions()
         self.blast_dataset_ddl_1.addItem('-- Select --')
@@ -154,9 +159,8 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
         self.disable_ui_elements()
 
     def populate_gene_suggestions(self):
-        thread.start_new_thread(self.monitor_clipboard, ())
         # self.accession_numbers_list.removeDuplicates()
-        self.completer = QtGui.QCompleter(self.accession_numbers_list.keys() + self.gene_info_list.keys(), self)
+        self.completer = QtGui.QCompleter(self.accession_number_list.keys() + self.gene_info_list.keys(), self)
         self.completer.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.search_bar.setCompleter(self.completer)
@@ -170,14 +174,14 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
         if self.search_text in self.gene_info_list.keys():
             self.selected_gene_name = self.search_text
             items = [self.accession_list.itemText(i) for i in range(self.accession_list.count())]
-            for accession in set(self.gene_info_list[self.selected_gene_name][0]):
+            for accession in self.gene_info_list[self.selected_gene_name]:
                 if accession not in items:
                     self.accession_list.addItem(accession)
             self.accession_list.setCurrentIndex(0)
             self.enable_ui_elements()
-        elif self.search_text in self.accession_numbers_list.keys():
-            self.selected_gene_name = self.accession_numbers_list[self.search_text]
-            for accession in set(self.gene_info_list[self.selected_gene_name][0]):
+        elif self.search_text in self.accession_number_list.keys():
+            self.selected_gene_name = self.accession_number_list[self.search_text]
+            for accession in self.gene_info_list[self.selected_gene_name]:
                 self.accession_list.addItem(accession)
             self.search_bar.setText(self.selected_gene_name)
             self.accession_list.setCurrentIndex(0)
@@ -196,7 +200,6 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
             if self.table_filtered:
                 self.table_filtered.clearContents()
                 self.table_filtered.setRowCount(0)
-
             # for i in range(5):
             #     self.table.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
             #     self.table_filtered.setItem(0, i, QtGui.QTableWidgetItem("NULL"))
@@ -255,22 +258,28 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
         html_string += '</body></html>'
         return html_string
 
-    def get_indexes(self):
-        gene_list = OrderedDict()
-        accession_list = OrderedDict()
-        for file_name in self.fileio.get_file_list(self.directory, input_folder, '.bqa'):
-            data = cPickle.load(open(os.path.join(self.directory, input_folder, file_name), 'rb'))
-            for k, e in data[0].items() + accession_list.items():
-                accession_list[k] = e
-            for l, g in data[1].items() + gene_list.items():
-                gene_list.setdefault(l, []).append(g)
-        return gene_list, accession_list
+    # def get_indexes(self):
+    #     gene_list = OrderedDict()
+    #     accession_list = OrderedDict()
+    #     for file_name in self.fileio.get_file_list(self.directory, input_folder, '.bqa'):
+    #         data = cPickle.load(open(os.path.join(self.directory, input_folder, file_name), 'rb'))
+    #         for k, e in data[0].items() + accession_list.items():
+    #             accession_list[k] = e
+    #         for l, g in data[1].items() + gene_list.items():
+    #             gene_list.setdefault(l, []).append(g)
+    #     return gene_list, accession_list
 
     def get_sequences(self):
-        fh = open(os.path.join('lists', self.list_file), 'r')
+        self.gene_info_list = OrderedDict()
+        self.accession_number_list = OrderedDict()
+        fh = open(os.path.join('lists', self.list_file))
         self.sequences_info_list = {}
         for line in fh.readlines():
             split = line.split()
+            self.accession_number_list[split[0]] = split[1]
+            if split[1] not in self.gene_info_list:
+                self.gene_info_list[split[1]] = []
+            self.gene_info_list[split[1]].append("%s" % split[0])
             self.sequences_info_list[split[0]] = {'gene_name' : split[1],
                                                   'nm_number' : split[0],
                                                   'orf_start' : int(split[6]) + 1,
@@ -279,10 +288,6 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
                                                   'intron'    : split[8],
                                                   'chromosome': split[2]
                                                   }
-
-
-
-
 
     def _initialize_results_store(self):
         self.results = [[], [], []]
@@ -347,6 +352,13 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
         table.setSortingEnabled(True)
         table.sortItems(1, 1)
 
+    def load_dataset(self, dataset_name):
+        self.datasets_cache[dataset_name] = cPickle.load(open(os.path.join(self.directory, self.input_folder,
+                                                                           dataset_name), 'rb'))
+
+        self.enable_ui_elements()
+        self._dataset_selected()
+
     def _dataset_selected(self):
         index = 0
         dataset_name = self.selected_dataset_names[index]
@@ -363,8 +375,9 @@ class Query_Blast_Gui(QtGui.QMainWindow, form_class):
             try:
                 self.datasets_cache[dataset_name]
             except KeyError:
-                self.datasets_cache[dataset_name] = cPickle.load(open(os.path.join(self.directory, self.input_folder,
-                                                                                   dataset_name), 'rb'))
+                self.disable_ui_elements()
+                print dataset_name
+                thread.start_new_thread(self.load_dataset, (dataset_name,))
 
             count = 1
             for name in self.selected_dataset_names:

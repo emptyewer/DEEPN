@@ -5,20 +5,15 @@ class jcnt():
         self.frame = ''
         self.ppm = 0.0
         self.orf = ''
-        self.pos_que = ''
         self.frame_orf = False
+        self.count = 1
 
     def __repr__(self):
-        string = "<Junction pos:%d, q.start:%d, ppm:%.3f, frame:%s, orf:%s, pos_que:%s>" % (self.position,
-                                                                                            self.query_start,
-                                                                                            self.ppm,
-                                                                                            self.frame,
-                                                                                            self.orf,
-                                                                                            self.pos_que)
+        string = "<Junction pos:%d, " \
+                 "q.start:%d, ppm:%.3f, " \
+                 "frame:%s, orf:%s, " \
+                 "count:%d>" % (self.position, self.query_start, self.ppm, self.frame, self.orf, self.count)
         return string
-
-    def __eq__(self, other):
-        return self.pos_que == other.pos_que
 
     def __ne__(self, other):
         return not self.__eq__(other)
