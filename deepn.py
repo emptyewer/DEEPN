@@ -414,10 +414,12 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
             self.status_bar.showMessage("Running %s ..." % self.clicked_button_text)
             if sys.platform == 'win32':
                 self.process.start('Read Depth/Read Depth.exe', [self.directory,
-                                                                 self.gene_list_file])
+                                                                 self.gene_list_file,
+                                                                 str(self.combined)])
             elif sys.platform == 'darwin':
                 self.process.start('Read Depth.app/Contents/MacOS/Read Depth', [self.directory,
-                                                                                self.gene_list_file])
+                                                                                self.gene_list_file,
+                                                                                str(self.combined)])
         elif self.clicked_button == self.sender():
             self.process.terminate()
 

@@ -23,6 +23,7 @@ pg.setConfigOption('foreground', 'k')
 
 main_directory = sys.argv[1]
 gene_list_file = sys.argv[2]
+combined = int(sys.argv[3])
 
 # def excepthook(excType, excValue, tracebackobj):
 #     """
@@ -130,6 +131,7 @@ class CalculateDepth_Thread(QtCore.QThread):
 class Read_Depth_Gui(QtGui.QMainWindow, form_class):
     depth_calculated_signal = QtCore.pyqtSignal()
     dataset_loaded_signal = QtCore.pyqtSignal()
+
     def __init__(self, folder, directory, gene_list_file, *args):
         super(Read_Depth_Gui, self).__init__(*args)
         self.setupUi(self)
@@ -306,6 +308,8 @@ def appExit():
 
 if __name__ == '__main__':
     input_folder = 'mapped_sam_files'
+    if combined == 1:
+        input_folder = 'sam_files'
     form = Read_Depth_Gui(input_folder, main_directory, gene_list_file)
     form.show()
     app.aboutToQuit.connect(appExit)
