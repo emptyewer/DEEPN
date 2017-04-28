@@ -206,8 +206,9 @@ class DEEPN_Launcher(QtGui.QMainWindow, form_class):
                 self.query_blast_btn.setEnabled(False)
 
 
-            if os.path.exists(os.path.join(self.directory, 'gene_count_summary')) and len(self.fileio.get_file_list(
-                    self.directory, 'mapped_sam_files', '.sam')) > 0:
+            if os.path.exists(os.path.join(self.directory, 'gene_count_summary')) and \
+                    (len(self.fileio.get_file_list(self.directory, 'mapped_sam_files', '.sam')) > 0 or
+                     len(self.fileio.get_file_list(self.directory, 'sam_files', '.sam')) > 0):
                 self.read_depth_btn.setEnabled(True)
             else:
                 self.read_depth_btn.setEnabled(False)
