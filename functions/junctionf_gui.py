@@ -6,9 +6,18 @@ import subprocess
 from sys import platform as _platform
 from collections import Counter
 
-import libraries.joblib.parallel as Parallel
+import threading
+import multiprocessing
 import functions.process as process
 import functions.structures as sts
+
+
+def threaded(fn):
+    def wrapper(*args, **kwargs):
+        thread = threading.Thread(target=fn, args=args, kwargs=kwargs)
+        thread.start()
+        return thread
+    return wrapper
 
 class junctionf():
     def __init__(self, f, p):
@@ -19,8 +28,12 @@ class junctionf():
         self._spin = None
 
     def sigterm_handler(self, _signo, _stack_frame):
-        self.blast_pipe.terminate()
-        self._spin.stop()
+        if self.blast_pipe:
+            self.blast_pipe.terminate()
+
+        if self._spin:
+            self._spin.stop()
+
         if self.blast_pipe < 0:
             print ">>> Terminated Process (%d). Now Exiting Gracefully!" % self.blast_pipe
             sys.stdout.flush()
@@ -134,7 +147,7 @@ class junctionf():
                              }
                     for nm in blast_dict[gene].keys():
                         for j in blast_dict[gene][nm]:
-                            j.ppm = j.count * 1000000 / blast_dict['total']
+                            j.ppm = j.count * 1000000.0 / blast_dict['total']
                             stats[j.frame] += 1
                             stats[j.orf] += 1
                             if j.frame_orf:

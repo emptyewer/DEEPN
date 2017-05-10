@@ -8,6 +8,7 @@ import functions.fileio_gui as f
 import functions.junctionf_gui as j
 import functions.printio_gui as p
 
+
 input_data_folder = 'unmapped_sam_files'     #Manage name of input folder here
 junction_folder = 'junction_files'            #Manage name of junction reads output folder here
 blast_results_folder = 'blast_results'            #Manage name of blast results output folder here
@@ -75,14 +76,17 @@ if __name__ == '__main__':
     junctionf = j.junctionf(fileio, printio)
     sys.stdout.write("\n*** Junction Search ***\n\n")
     sys.stdout.flush()
-    signal.signal(signal.SIGTERM, junctionf.sigterm_handler)
+    # signal.signal(signal.SIGTERM, junctionf.sigterm_handler)
 
     # printio.print_comment("Comment1")
     # fileio.input_data_check(main_directory, input_data_folder, '.sam',
     #                         [junction_folder, blast_results_folder, blast_results_query])
     initialize_folders(main_directory)
     junctionf.junction_search(main_directory, junction_folder, input_data_folder, blast_results_folder,
-                              blast_results_query, junction_sequence, exclusion_sequence)
+                             blast_results_query, junction_sequence, exclusion_sequence)
     # printio.print_comment("Comment3")
     junctionf.blast_search(main_directory, blast_db_name, blast_results_folder, blast_results_query)
-    junctionf.generate_tabulated_blast_results(main_directory, blast_results_folder, blast_results_query, gene_list_file)
+    junctionf.generate_tabulated_blast_results(main_directory,
+                                               blast_results_folder,
+                                               blast_results_query,
+                                               gene_list_file)
