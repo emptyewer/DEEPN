@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export DEEPN_VERSION=3.2
+export DEEPN_VERSION=3.3
 rm -rf dist/*
 rm -rf build/*
 unzip lists/mm10GeneList.prn.zip ./lists/mm10GeneList.prn
