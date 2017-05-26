@@ -28,35 +28,9 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_8">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QHBoxLayout" name="top_layout">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QPushButton" name="folder_choice_btn">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>42</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>150</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Choose Folder...</string>
-          </property>
-         </widget>
-        </item>
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="DragDropListView" name="file_list">
           <property name="minimumSize">
@@ -82,6 +56,32 @@
             <width>20</width>
             <height>20</height>
            </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="folder_choice_btn">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>42</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Choose Folder...</string>
           </property>
          </widget>
         </item>
@@ -111,21 +111,6 @@
           </property>
           <property name="text">
            <string>Vector 2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="4">
-         <widget class="QPushButton" name="run_btn">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Run</string>
           </property>
          </widget>
         </item>
@@ -592,6 +577,37 @@
            <string>Verify Installation</string>
           </property>
          </widget>
+        </item>
+        <item row="10" column="4">
+         <layout class="QHBoxLayout" name="horizontalLayout_15">
+          <item>
+           <widget class="QPushButton" name="overdisp_btn">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Estimate Overdispersion</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="run_btn">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Run</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
