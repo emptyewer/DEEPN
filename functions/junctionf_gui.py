@@ -182,7 +182,7 @@ class junctionf():
                     if exclusion_sequence not in downstream_rf or exclusion_sequence == '':
                         value = 1
                         protein_sequence = self.process.translate_orf(downstream_rf)
-                        output_filehandle.write(" ".join(l[:5]) + " " + l[9] + " " + downstream_rf
+                        output_filehandle.write(" ".join(l[:4]) + " " + l[9] + " " + downstream_rf
                                                 + " " + protein_sequence + "\n")
             return value
 
