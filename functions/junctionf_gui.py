@@ -206,9 +206,12 @@ class junctionf():
     def _make_search_junctions(self, junctions_array):
         jseqs = []
         for junc in junctions_array:
-            jseqs.append(junc[35:50])
-            jseqs.append(junc[31:46])
-            jseqs.append(junc[27:42])
+            # jseqs.append(junc[35:50]) These are 15 bp junctions
+            # jseqs.append(junc[31:46])
+            # jseqs.append(junc[27:42])
+            jseqs.append(junc[30:50])
+            jseqs.append(junc[26:46])
+            jseqs.append(junc[22:42])
         return jseqs
 
     def _get_accession_number_list(self, gene_list_file):
