@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-export DEEPN_VERSION=3.3
+export DEEPN_VERSION=3.5
 rm -rf dist/*
 rm -rf build/*
-unzip lists/mm10GeneList.prn.zip ./lists/mm10GeneList.prn
-unzip lists/sacCer3GeneBordersIntrons.prn.zip ./lists/sacCer3GeneBordersIntrons.prn
-unzip lists/hg38GeneList.prn.zip ./lists/hg38GeneList.prn
+#unzip lists/mm10GeneList.prn.zip ./lists/mm10GeneList.prn
+#unzip lists/sacCer3GeneBordersIntrons.prn.zip ./lists/sacCer3GeneBordersIntrons.prn
+#unzip lists/hg38GeneList.prn.zip ./lists/hg38GeneList.prn
 python setup_deepn.py py2app --includes sip --packages PyQt4
 python setup_genecount.py py2app --includes sip --packages PyQt4
 python setup_junctionmake.py py2app --includes sip --packages PyQt4
