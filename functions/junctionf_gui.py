@@ -121,12 +121,13 @@ class junctionf():
 
         for file_name in file_list:
             output_file = os.path.join(directory, blast_results_folder, file_name.replace(".junctions.fa", '.blast.txt'))
+            print ">>> Running BLAST search for file: " + file_name
             blast_command_list = [os.path.join(blast_path, 'blastn' + suffix),
                                   '-query', os.path.join(directory, 'blast_results', file_name), '-db', db_path,
                                   '-task',  'blastn', '-dust', 'no', '-num_threads', str(Parallel.cpu_count()),
                                   '-outfmt', '7', '-out', output_file, '-evalue', '0.2', '-max_target_seqs', '10']
             # blast_command = " ".join(blast_command_list)
-            print ">>> Running BLAST search for file: " + file_name
+
             sys.stdout.flush()
             # os.system(blast_command)
             self.blast_pipe = subprocess.Popen(blast_command_list, shell=False)

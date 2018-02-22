@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export DEEPN_VERSION=3.5
+export DEEPN_VERSION=3.7
 rm -rf dist/*
 rm -rf build/*
 #unzip lists/mm10GeneList.prn.zip ./lists/mm10GeneList.prn
@@ -23,4 +23,4 @@ cd dist
 mv DEEPN.app DEEPN_${DEEPN_VERSION}.app
 mv Stat\ Maker.app Stat\ Maker_${DEEPN_VERSION}.app
 tar cvfj DEEPN_${DEEPN_VERSION}_macOS.tar.bz2 DEEPN_${DEEPN_VERSION}.app
-tar cvfj Stat_Maker_${DEEPN_VERSION}_macOS.tar.bz2 Stat\ Maker.app
+tar cvfj Stat_Maker_${DEEPN_VERSION}_macOS.tar.bz2 Stat\ Maker_${DEEPN_VERSION}.app
